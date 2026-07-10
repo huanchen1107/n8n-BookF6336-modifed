@@ -3,14 +3,11 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "trigger-node-id",
+      "id": "trigger-node",
       "name": "When clicking \"Execute Workflow\"",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ]
+      "position": [ 0, 0 ]
     },
     {
       "parameters": {
@@ -24,43 +21,50 @@
             },
             {
               "name": "elementName",
-              "value": "MaxT,MinT,T"
+              "value": "平均溫度"
             }
           ]
         },
         "options": {}
       },
-      "id": "http-request-node-id",
-      "name": "Get 7-Day Forecast (F-D0047-091)",
+      "id": "http-node",
+      "name": "Get 7-Day Forecast",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
-      "position": [
-        220,
-        0
-      ]
+      "position": [ 220, 0 ]
     },
     {
       "parameters": {
-        "url": "https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "CWA-55FDA6D3-A43C-4AE0-BB30-E62D5F684FB2"
-            }
-          ]
-        },
+        "jsCode": "const locations = $input.all()[0].json.records.Locations[0].Location;\nconst results = [];\n\nfor (const loc of locations) {\n  const name = loc.LocationName;\n  const tempElement = loc.WeatherElement.find(e => e.ElementName === \"平均溫度\") || loc.WeatherElement[0];\n  let tempStr = \"\";\n  \n  if (tempElement && tempElement.Time) {\n    for (let i = 0; i < Math.min(7, tempElement.Time.length); i++) {\n        tempStr += tempElement.Time[i].ElementValue[0].Temperature + \"°C, \";\n    }\n  }\n  \n  results.push({\n    json: {\n      \"Location\": name,\n      \"7-Day Temperatures\": tempStr.replace(/, $/, \"\")\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "code-node",
+      "name": "Parse Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [ 440, 0 ]
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
         "options": {}
       },
-      "id": "http-request-observation-node",
-      "name": "Get Current Observation (O-A0001-001)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [
-        220,
-        180
-      ]
+      "id": "spreadsheet-node",
+      "name": "Convert to Excel",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1,
+      "position": [ 660, 0 ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/Users/huango/n8n-data/ch02/ch2-cwa-test1.xlsx",
+        "options": {}
+      },
+      "id": "write-node",
+      "name": "Save Excel File",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [ 880, 0 ]
     }
   ],
   "pinData": {},
@@ -69,12 +73,40 @@
       "main": [
         [
           {
-            "node": "Get 7-Day Forecast (F-D0047-091)",
+            "node": "Get 7-Day Forecast",
             "type": "main",
             "index": 0
-          },
+          }
+        ]
+      ]
+    },
+    "Get 7-Day Forecast": {
+      "main": [
+        [
           {
-            "node": "Get Current Observation (O-A0001-001)",
+            "node": "Parse Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Data": {
+      "main": [
+        [
+          {
+            "node": "Convert to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Excel": {
+      "main": [
+        [
+          {
+            "node": "Save Excel File",
             "type": "main",
             "index": 0
           }
@@ -86,7 +118,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "b1b01c10-0a8a-40a2-aaaf-5527f0ef7e89",
+  "versionId": "2c62c3f8-8a8b-4b13-9c88-5f25a3d46cb0",
   "id": "ch2-cwa-test1-id",
   "tags": []
 }
