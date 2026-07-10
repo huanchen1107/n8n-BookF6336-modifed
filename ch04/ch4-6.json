@@ -1,0 +1,418 @@
+{
+  "name": "ch4-6",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        32
+      ],
+      "id": "15d11d56-e962-4c6f-abfb-e267e3c6b411",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\customer_service_main.xlsx",
+        "sheetNameOptions": "客服主資料",
+        "includeRowNumber": false
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        128,
+        32
+      ],
+      "id": "fb3bc192-ffdc-4a08-828f-d1718dfd2cf9",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位客服資料分類專家。\n請分析以下客戶問題，判斷屬於哪一類別，並提供簡短摘要。\n\n客戶問題：{{ $json['客戶問題'] }}\n\n請用 JSON 格式回覆，格式如下：\n{\n  \"category\": \"技術類\",   // 只能是：技術類、業務類、物流類 其中之一\n  \"summary\": \"問題摘要\"   // 20字以內的問題摘要\n}\n\n分類原則：\n- 技術類：系統問題、登入、軟體、App、API、網頁顯示異常\n- 業務類：價格、授權、合約、報價、升級方案、折扣優惠\n- 物流類：訂單、出貨、配送、退貨、地址修改、包裹\n\n只輸出 JSON，不要其他說明文字。\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        272,
+        32
+      ],
+      "id": "92b36d4d-1b4c-41c0-8bf4-19aa77677e49",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9fb8ad34-8f46-47a8-a67b-c742d9305409",
+              "name": "category",
+              "value": "={{ JSON.parse($json.text).category }}",
+              "type": "string"
+            },
+            {
+              "id": "10481a8f-e6d6-430c-bcc2-c7b9c19965f8",
+              "name": "summary",
+              "value": "={{ JSON.parse($json.text).summary }}",
+              "type": "string"
+            },
+            {
+              "id": "7e0e1afd-85a5-4ff9-bc7e-9fa32a172a20",
+              "name": "編號",
+              "value": "={{ $('Read rows from Excel').item.json['編號'] }}",
+              "type": "number"
+            },
+            {
+              "id": "efb456ba-5ba3-4026-828c-23bd04d049cd",
+              "name": "客戶姓名",
+              "value": "={{ $('Read rows from Excel').item.json['客戶姓名'] }}",
+              "type": "string"
+            },
+            {
+              "id": "f6f533ba-8ea0-4576-bec2-60060b1dee37",
+              "name": "電子郵件",
+              "value": "={{ $('Read rows from Excel').item.json['電子郵件'] }}",
+              "type": "string"
+            },
+            {
+              "id": "6af9c5f7-6734-4e66-bd00-1fd5e70c2b61",
+              "name": "客戶問題",
+              "value": "={{ $('Read rows from Excel').item.json['客戶問題'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        224
+      ],
+      "id": "ac58cb0f-eff2-4200-b656-07d6934db343",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        96,
+        240
+      ],
+      "id": "e1402548-a197-4872-9625-1c5e7449169e",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BE03B8XedTGZrDN2",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "技術類",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ec82f199-6f54-4132-b025-be1bb2304115"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9f74a659-cabd-406f-b6d2-dc52a7d47681",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "業務類",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a74d75fb-1cb1-461a-83d9-d1394d09c88b",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "物流類",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        80
+      ],
+      "id": "7eaf07f4-213c-4d49-b1c1-4c611c0f31df",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        -80
+      ],
+      "id": "36e38c89-4218-4f16-b0f3-3dad82cc97e6",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:/n8n-data/ch04/customer_service_tech.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        -80
+      ],
+      "id": "31676304-537d-4223-b9f3-44014d059e18",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        96
+      ],
+      "id": "a10310dc-4ed4-40e3-85ba-bb9896055ca6",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        272
+      ],
+      "id": "b4a1f93d-0704-4500-9cf9-24793ecd9ba8",
+      "name": "Convert to File2"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:/n8n-data/ch04/customer_service_business.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        96
+      ],
+      "id": "d30eb6ed-1c67-4f3b-901b-7d160f8e7423",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:/n8n-data/ch04/customer_service_logistics.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        272
+      ],
+      "id": "c603d8e9-dd4e-44e1-a57f-7db453131f6e",
+      "name": "Read/Write Files from Disk2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "71afc5c6-65ad-48f1-93a3-e78d41b95c6c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "O4QL2evFaP1eePbi",
+  "tags": []
+}

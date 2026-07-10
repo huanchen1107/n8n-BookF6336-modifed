@@ -1,0 +1,998 @@
+<h1 id="n8n-code-節點-ai-提示詞指南vibe-coding">n8n Code 節點 AI
+提示詞指南（Vibe Coding）</h1>
+<blockquote>
+<p>本指南提供結構化的提示詞模板，協助你使用生成式 AI 快速產生 n8n Code
+節點所需的程式碼</p>
+</blockquote>
+<hr />
+<h2 id="目錄">目錄</h2>
+<ol type="1">
+<li><a href="#提示詞基本結構">提示詞基本結構</a></li>
+<li><a href="#n8n-環境說明模板">n8n 環境說明模板</a></li>
+<li><a href="#javascript-節點提示詞">JavaScript 節點提示詞</a></li>
+<li><a href="#python-節點提示詞">Python 節點提示詞</a></li>
+<li><a href="#常見應用場景提示詞庫">常見應用場景提示詞庫</a></li>
+<li><a href="#除錯與優化提示詞">除錯與優化提示詞</a></li>
+</ol>
+<hr />
+<h2 id="提示詞基本結構">提示詞基本結構</h2>
+<h3 id="標準提示詞框架">標準提示詞框架</h3>
+<pre><code>【環境說明】
+我正在使用 n8n 自動化平台，需要在 Code 節點中撰寫程式碼。
+
+【n8n Code 節點特性】
+- 語言：[JavaScript / Python]
+- 可用的全域物件：$input, $json, $binary, $node, $workflow, $env
+- 輸入資料格式：[描述輸入資料的結構]
+- 期望輸出格式：[描述期望的輸出結構]
+
+【任務描述】
+[清楚描述你要完成的任務]
+
+【具體需求】
+1. [需求項目 1]
+2. [需求項目 2]
+3. [需求項目 3]
+
+【輸入範例】（如果有的話）
+[提供實際的輸入資料範例]
+
+【期望輸出範例】（如果有的話）
+[提供期望的輸出資料範例]
+
+【額外限制】
+- [例如：不使用外部套件]
+- [例如：需要錯誤處理]
+- [例如：效能要求]</code></pre>
+<hr />
+<h2 id="n8n-環境說明模板">n8n 環境說明模板</h2>
+<h3 id="javascript-code-節點環境模板">JavaScript Code 節點環境模板</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">### n8n JavaScript Code 節點環境說明</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>**可用的全域物件：**</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`$input.all()`</span> - 取得所有輸入項目的陣列</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`$input.first()`</span> - 取得第一個輸入項目</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`$input.item`</span> - 當前處理的項目（在 Run Once for Each Item 模式）</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`$json`</span> - 當前項目的 JSON 資料</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`$binary`</span> - 當前項目的二進位資料</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>**資料結構：**</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>每個項目包含：</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="in">```javascript</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">json</span><span class="op">:</span> { <span class="co">/* JSON 資料 */</span> }<span class="op">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">binary</span><span class="op">:</span> {</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">data</span><span class="op">:</span> <span class="bu">Buffer</span><span class="op">,</span>      <span class="co">// 二進位資料</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mimeType</span><span class="op">:</span> string<span class="op">,</span>  <span class="co">// MIME 類型</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">fileName</span><span class="op">:</span> string   <span class="co">// 檔案名稱</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>返回格式：</strong> 必須返回陣列，每個元素是一個包含 json
+和/或 binary 的物件：</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> [</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">json</span><span class="op">:</span> { <span class="co">/* 資料 */</span> }<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">binary</span><span class="op">:</span> { <span class="co">/* 二進位資料 */</span> }</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>]<span class="op">;</span></span></code></pre></div>
+<p><strong>可用的 Node.js 模組：</strong> - 內建模組：fs, path, crypto,
+buffer 等 - 已安裝的 npm 套件（需事先在 n8n 環境安裝）</p>
+<p><strong>不可使用：</strong> - localStorage / sessionStorage - window
+/ document（非瀏覽器環境）</p>
+<pre><code>
+### Python Code 節點環境模板
+
+```markdown
+### n8n Python Code 節點環境說明
+
+**可用的全域物件：**
+- `items` - 輸入項目的列表
+- 每個項目的結構：
+  ```python
+  {
+    &#39;json&#39;: {},      # JSON 資料
+    &#39;binary&#39;: {}     # 二進位資料
+  }</code></pre>
+<p><strong>存取資料：</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 取得第一個項目的 JSON 資料</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>first_item <span class="op">=</span> items[<span class="dv">0</span>][<span class="st">&#39;json&#39;</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 取得二進位資料</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>binary_data <span class="op">=</span> items[<span class="dv">0</span>][<span class="st">&#39;binary&#39;</span>][<span class="st">&#39;data&#39;</span>]</span></code></pre></div>
+<p><strong>返回格式：</strong> 必須返回列表：</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> [</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;json&#39;</span>: { <span class="op">/*</span> 資料 <span class="op">*/</span> },</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;binary&#39;</span>: { <span class="op">/*</span> 二進位資料 <span class="op">*/</span> }</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<p><strong>可用的 Python 模組：</strong> - 標準庫：json, re, datetime,
+base64, hashlib 等 - 已安裝的第三方套件（需事先在 n8n 環境安裝）</p>
+<pre><code>
+---
+
+## JavaScript 節點提示詞
+
+### 1. 資料格式轉換
+
+#### CSV 轉 JSON
+</code></pre>
+<p>我正在使用 n8n 的 JavaScript Code 節點，需要將 CSV 檔案轉換為 JSON
+格式。</p>
+<p>【輸入資料】 - 來源：$input.first().binary.data（Buffer 格式的 CSV
+檔案） - CSV 格式：第一行是標題，後續是資料行 - 編碼：UTF-8</p>
+<p>【任務需求】 1. 讀取 CSV 內容並解析 2. 將第一行作為欄位名稱（header）
+3. 將每一行資料轉換為 JSON 物件 4. 處理可能的空白字元和空行 5. 返回 JSON
+陣列</p>
+<p>【輸入範例】</p>
+<pre><code>姓名,年齡,Email
+張三,25,zhang@example.com
+李四,30,li@example.com</code></pre>
+<p>【期望輸出】</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;姓名&quot;</span><span class="fu">:</span> <span class="st">&quot;張三&quot;</span><span class="fu">,</span> <span class="dt">&quot;年齡&quot;</span><span class="fu">:</span> <span class="st">&quot;25&quot;</span><span class="fu">,</span> <span class="dt">&quot;Email&quot;</span><span class="fu">:</span> <span class="st">&quot;zhang@example.com&quot;</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;姓名&quot;</span><span class="fu">:</span> <span class="st">&quot;李四&quot;</span><span class="fu">,</span> <span class="dt">&quot;年齡&quot;</span><span class="fu">:</span> <span class="st">&quot;30&quot;</span><span class="fu">,</span> <span class="dt">&quot;Email&quot;</span><span class="fu">:</span> <span class="st">&quot;li@example.com&quot;</span><span class="fu">}</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ot">]</span></span></code></pre></div>
+<p>【注意事項】 - 不使用外部 CSV 解析套件（使用原生字串處理） -
+需要處理欄位中可能包含逗號的情況（用引號包圍） - 加入錯誤處理</p>
+<pre><code>
+#### JSON 轉 Excel
+</code></pre>
+<p>我需要在 n8n JavaScript Code 節點中，將 JSON 資料轉換為 Excel
+檔案。</p>
+<p>【環境】 - 已安裝套件：xlsx - 輸入：$input.first().json.data（JSON
+陣列） - 輸出：Excel 檔案的 Buffer</p>
+<p>【任務需求】 1. 使用 xlsx 套件將 JSON 轉為 Excel 2. 設定工作表名稱為
+“Data” 3. 自動調整欄位寬度 4. 第一行設為標題（粗體） 5. 返回 Excel
+檔案的 Buffer</p>
+<p>【輸入範例】</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;產品&quot;</span><span class="fu">:</span> <span class="st">&quot;筆記型電腦&quot;</span><span class="fu">,</span> <span class="dt">&quot;價格&quot;</span><span class="fu">:</span> <span class="dv">30000</span><span class="fu">,</span> <span class="dt">&quot;庫存&quot;</span><span class="fu">:</span> <span class="dv">15</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">{</span><span class="dt">&quot;產品&quot;</span><span class="fu">:</span> <span class="st">&quot;滑鼠&quot;</span><span class="fu">,</span> <span class="dt">&quot;價格&quot;</span><span class="fu">:</span> <span class="dv">500</span><span class="fu">,</span> <span class="dt">&quot;庫存&quot;</span><span class="fu">:</span> <span class="dv">100</span><span class="fu">}</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ot">]</span></span></code></pre></div>
+<p>【輸出要求】 返回包含 binary 資料的物件： - mimeType:
+‘application/vnd.openxmlformats-officedocument.spreadsheetml.sheet’ -
+fileName: ‘output.xlsx’</p>
+<pre><code>
+### 2. 資料處理與清理
+
+#### 資料去重
+</code></pre>
+<p>在 n8n JavaScript Code 節點中，我需要對資料進行去重處理。</p>
+<p>【輸入資料】 - 來源：$input.all()（多個項目的陣列） - 每個項目包含
+json 物件，其中有 id 欄位</p>
+<p>【任務需求】 1. 根據 id 欄位進行去重 2. 如果有重複的
+id，保留第一次出現的記錄 3. 統計去重前後的數量 4.
+返回去重後的資料陣列</p>
+<p>【範例輸入】</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>[</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">json</span><span class="op">:</span> {<span class="dt">id</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">name</span><span class="op">:</span> <span class="st">&quot;A&quot;</span>}}<span class="op">,</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">json</span><span class="op">:</span> {<span class="dt">id</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="dt">name</span><span class="op">:</span> <span class="st">&quot;B&quot;</span>}}<span class="op">,</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">json</span><span class="op">:</span> {<span class="dt">id</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">name</span><span class="op">:</span> <span class="st">&quot;C&quot;</span>}}<span class="op">,</span>  <span class="co">// 重複</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">json</span><span class="op">:</span> {<span class="dt">id</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span> <span class="dt">name</span><span class="op">:</span> <span class="st">&quot;D&quot;</span>}}</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<p>【期望輸出】 返回去重後的陣列，並在第一個項目的 json
+中加入統計資訊：</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">json</span><span class="op">:</span> {</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">deduplicatedData</span><span class="op">:</span> [<span class="op">...</span>]<span class="op">,</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">statistics</span><span class="op">:</span> {</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">originalCount</span><span class="op">:</span> <span class="dv">4</span><span class="op">,</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">deduplicatedCount</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">removedCount</span><span class="op">:</span> <span class="dv">1</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>
+#### 資料驗證
+</code></pre>
+<p>我需要在 n8n JavaScript Code 節點中驗證資料的完整性和格式。</p>
+<p>【輸入資料】 來源：$input.first().json.records（物件陣列）</p>
+<p>【驗證規則】 1. 必填欄位：name, email, phone 2. Email
+格式驗證（正規表達式） 3. 電話格式驗證（台灣手機號碼：09 開頭 10 碼） 4.
+年齡範圍：0-120</p>
+<p>【任務需求】 1. 遍歷所有記錄進行驗證 2. 將記錄分為 valid 和 invalid
+兩類 3. 對於無效記錄，列出所有錯誤訊息 4. 返回驗證報告</p>
+<p>【輸出格式】</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">json</span><span class="op">:</span> {</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">summary</span><span class="op">:</span> {</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">total</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">valid</span><span class="op">:</span> <span class="dv">8</span><span class="op">,</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">invalid</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">validRate</span><span class="op">:</span> <span class="st">&quot;80%&quot;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">validRecords</span><span class="op">:</span> [<span class="op">...</span>]<span class="op">,</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">invalidRecords</span><span class="op">:</span> [</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">record</span><span class="op">:</span> {<span class="op">...</span>}<span class="op">,</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">errors</span><span class="op">:</span> [<span class="st">&quot;Email 格式錯誤&quot;</span><span class="op">,</span> <span class="st">&quot;電話格式錯誤&quot;</span>]</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>
+### 3. 檔案處理
+
+#### 批量重命名檔案
+</code></pre>
+<p>在 n8n JavaScript Code 節點中，我需要批量重命名檔案。</p>
+<p>【輸入資料】 - 來源：$input.all() -
+每個項目包含檔案路徑：item.json.filePath</p>
+<p>【重命名規則】 1. 格式：YYYY-MM-DD_原始檔名.副檔名 2.
+日期使用當前日期 3. 移除檔名中的空格，替換為底線 4. 轉換為小寫</p>
+<p>【任務需求】 1. 使用 Node.js fs 模組執行重命名 2.
+檢查新檔名是否已存在，若存在則加上編號 (1), (2)… 3.
+記錄重命名成功和失敗的檔案 4. 返回處理結果</p>
+<p>【範例】 輸入：<code>/path/to/My Document.pdf</code>
+輸出：<code>/path/to/2025-11-08_my_document.pdf</code></p>
+<p>【輸出格式】 返回包含處理結果的物件，包括成功、失敗列表</p>
+<pre><code>
+#### 圖片壓縮
+</code></pre>
+<p>我需要在 n8n JavaScript Code 節點中使用 sharp 套件壓縮圖片。</p>
+<p>【環境】 - 已安裝：sharp - 輸入：$input.all()，每個項目的 binary.data
+是圖片 Buffer</p>
+<p>【任務需求】 1. 壓縮為 JPEG 格式，品質 80% 2. 如果圖片寬度超過
+1920px，等比例縮放 3. 啟用漸進式 JPEG 4. 計算並記錄壓縮率 5.
+保留原始檔名，但改為 .jpg 副檔名</p>
+<p>【輸出格式】 返回壓縮後的圖片 Buffer，並在 json 中記錄： -
+originalSize（原始大小，bytes） - compressedSize（壓縮後大小，bytes） -
+compressionRatio（壓縮率，百分比） - originalWidth, originalHeight -
+newWidth, newHeight</p>
+<p>【效能要求】 - 需要處理的圖片數量可能很多，使用 async/await
+確保穩定性</p>
+<pre><code>
+### 4. 文字處理
+
+#### Markdown 轉 HTML
+</code></pre>
+<p>在 n8n JavaScript Code 節點中，我需要將 Markdown 轉換為 HTML。</p>
+<p>【環境】 - 可選套件：marked（如果已安裝） -
+如果未安裝，請使用簡易版本的 Markdown 解析</p>
+<p>【輸入資料】 - 來源：$input.first().binary.data（Buffer 格式的
+Markdown 檔案） - 編碼：UTF-8</p>
+<p>【任務需求】 1. 解析 Markdown 語法： - 標題 (# ## ###) - 粗體
+(<strong>text</strong> 或 <strong>text</strong>) - 斜體 (<em>text</em>
+或 <em>text</em>) - 連結 <a href="url">text</a> - 圖片 <img src="url"
+alt="alt" /> - 程式碼區塊 <code>language\ncode\n</code> - 行內程式碼
+<code>code</code> - 清單 (- 或 1.) 2. 加入基本 CSS 樣式 3. 產生完整的
+HTML 文件結構</p>
+<p>【輸出格式】 返回 HTML 檔案的 Buffer： - mimeType: ‘text/html’ -
+fileName: 原始檔名.html</p>
+<p>【CSS 樣式要求】 - 使用 sans-serif 字體 - 最大寬度 800px，置中 -
+程式碼區塊使用淺灰背景 - 響應式設計</p>
+<pre><code>
+#### 文字搜尋與替換
+</code></pre>
+<p>我需要在 n8n JavaScript Code 節點中進行批量文字搜尋與替換。</p>
+<p>【輸入資料】 - 檔案內容：<span
+class="math inline"><em>i</em><em>n</em><em>p</em><em>u</em><em>t</em>.<em>a</em><em>l</em><em>l</em>()，<em>每</em><em>個</em><em>項</em><em>目</em><em>的</em><em>b</em><em>i</em><em>n</em><em>a</em><em>r</em><em>y</em>.<em>d</em><em>a</em><em>t</em><em>a</em><em>是</em><em>文</em><em>字</em><em>檔</em><em>案</em> − <em>替</em><em>換</em><em>規</em><em>則</em>：</span>input.first().json.rules（陣列）</p>
+<p>【替換規則格式】</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>[</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">search</span><span class="op">:</span> <span class="st">&quot;old_text&quot;</span><span class="op">,</span> <span class="dt">replace</span><span class="op">:</span> <span class="st">&quot;new_text&quot;</span><span class="op">,</span> <span class="dt">caseSensitive</span><span class="op">:</span> <span class="kw">true</span>}<span class="op">,</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">search</span><span class="op">:</span> <span class="st">&quot;pattern&quot;</span><span class="op">,</span> <span class="dt">replace</span><span class="op">:</span> <span class="st">&quot;replacement&quot;</span><span class="op">,</span> <span class="dt">regex</span><span class="op">:</span> <span class="kw">true</span>}</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<p>【任務需求】 1. 支援一般文字替換 2. 支援正規表達式替換 3.
+支援大小寫敏感/不敏感 4. 統計每個規則的替換次數 5.
+保留原始檔案編碼（UTF-8）</p>
+<p>【輸出格式】 返回處理後的文字檔案，並在 json 中記錄： - fileName -
+totalReplacements（總替換次數） -
+replacementDetails（每個規則的替換次數）</p>
+<pre><code>
+### 5. 資料分析
+
+#### 統計分析
+</code></pre>
+<p>在 n8n JavaScript Code 節點中，我需要對數值資料進行統計分析。</p>
+<p>【輸入資料】 - 來源：<span
+class="math inline"><em>i</em><em>n</em><em>p</em><em>u</em><em>t</em>.<em>f</em><em>i</em><em>r</em><em>s</em><em>t</em>().<em>j</em><em>s</em><em>o</em><em>n</em>.<em>d</em><em>a</em><em>t</em><em>a</em>（<em>數</em><em>值</em><em>陣</em><em>列</em>） − <em>或</em>：</span>input.all()，從每個項目的特定欄位提取數值</p>
+<p>【分析項目】 1. 基本統計： - 總數（count） - 總和（sum） -
+平均值（mean） - 中位數（median） - 眾數（mode） 2. 離散程度： -
+最小值（min） - 最大值（max） - 範圍（range） - 標準差（standard
+deviation） - 四分位數（Q1, Q2, Q3） 3. 其他： - 異常值檢測（使用 IQR
+方法）</p>
+<p>【任務需求】 1. 計算所有統計指標 2. 識別並列出異常值 3.
+四捨五入到小數點後 2 位</p>
+<p>【輸出格式】</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">json</span><span class="op">:</span> {</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">statistics</span><span class="op">:</span> {</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">count</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">sum</span><span class="op">:</span> <span class="dv">5000</span><span class="op">,</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">mean</span><span class="op">:</span> <span class="fl">50.00</span><span class="op">,</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">median</span><span class="op">:</span> <span class="fl">48.50</span><span class="op">,</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>      <span class="co">// ... 其他統計值</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">outliers</span><span class="op">:</span> [<span class="dv">120</span><span class="op">,</span> <span class="dv">135</span>]<span class="op">,</span>  <span class="co">// 異常值列表</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">dataRange</span><span class="op">:</span> <span class="st">&quot;10 - 100&quot;</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>
+#### 資料分組與聚合
+</code></pre>
+<p>我需要在 n8n JavaScript Code 節點中對資料進行分組和聚合。</p>
+<p>【輸入資料】 - 來源：$input.first().json.records（物件陣列）</p>
+<p>【任務需求】 1. 根據指定欄位分組（例如：category） 2.
+對每組進行聚合計算： - 計數（count） - 總和（sum） - 平均值（average） -
+最大值（max） - 最小值（min） 3. 可以使用 lodash（如果已安裝） 4.
+排序結果（依計數或其他指標）</p>
+<p>【範例輸入】</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>[</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">category</span><span class="op">:</span> <span class="st">&quot;電子&quot;</span><span class="op">,</span> <span class="dt">price</span><span class="op">:</span> <span class="dv">1000</span><span class="op">,</span> <span class="dt">quantity</span><span class="op">:</span> <span class="dv">5</span>}<span class="op">,</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">category</span><span class="op">:</span> <span class="st">&quot;電子&quot;</span><span class="op">,</span> <span class="dt">price</span><span class="op">:</span> <span class="dv">500</span><span class="op">,</span> <span class="dt">quantity</span><span class="op">:</span> <span class="dv">10</span>}<span class="op">,</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">category</span><span class="op">:</span> <span class="st">&quot;食品&quot;</span><span class="op">,</span> <span class="dt">price</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span> <span class="dt">quantity</span><span class="op">:</span> <span class="dv">20</span>}</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<p>【期望輸出】</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">json</span><span class="op">:</span> {</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">groupedData</span><span class="op">:</span> {</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;電子&quot;</span><span class="op">:</span> {</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">count</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">totalPrice</span><span class="op">:</span> <span class="dv">1500</span><span class="op">,</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">avgPrice</span><span class="op">:</span> <span class="dv">750</span><span class="op">,</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">totalQuantity</span><span class="op">:</span> <span class="dv">15</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>      }<span class="op">,</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">&quot;食品&quot;</span><span class="op">:</span> {</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">count</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">totalPrice</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">avgPrice</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">totalQuantity</span><span class="op">:</span> <span class="dv">20</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>
+---
+
+## Python 節點提示詞
+
+### 1. 資料處理
+
+#### Pandas 資料清理
+</code></pre>
+<p>我正在使用 n8n 的 Python Code 節點，需要用 pandas 清理資料。</p>
+<p>【環境】 - Python 3.x - 已安裝：pandas, numpy -
+輸入：items[0][‘json’][‘data’]（字典列表）</p>
+<p>【任務需求】 1. 將輸入轉換為 pandas DataFrame 2. 資料清理步驟： -
+移除完全重複的行 - 處理缺失值（數值欄位填 0，文字欄位填 “N/A”） -
+移除空白字元（strip） - 轉換日期格式為 YYYY-MM-DD -
+標準化欄位名稱（小寫、底線） 3. 轉換回字典列表並返回</p>
+<p>【輸入範例】</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>[</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  {<span class="st">&quot;Name&quot;</span>: <span class="st">&quot; John &quot;</span>, <span class="st">&quot;Age&quot;</span>: <span class="dv">25</span>, <span class="st">&quot;Date&quot;</span>: <span class="st">&quot;2024/01/15&quot;</span>},</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  {<span class="st">&quot;Name&quot;</span>: <span class="st">&quot;Jane&quot;</span>, <span class="st">&quot;Age&quot;</span>: <span class="va">None</span>, <span class="st">&quot;Date&quot;</span>: <span class="st">&quot;2024-02-20&quot;</span>},</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  {<span class="st">&quot;Name&quot;</span>: <span class="st">&quot; John &quot;</span>, <span class="st">&quot;Age&quot;</span>: <span class="dv">25</span>, <span class="st">&quot;Date&quot;</span>: <span class="st">&quot;2024/01/15&quot;</span>}  <span class="co"># 重複</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<p>【期望輸出】 返回清理後的資料，包含統計資訊： - 清理後的記錄數 -
+移除的重複行數 - 處理的缺失值數量</p>
+<pre><code>
+#### 正規表達式批量處理
+</code></pre>
+<p>在 n8n Python Code 節點中，我需要使用正規表達式處理文字資料。</p>
+<p>【輸入資料】 - 來源：items（列表） - 每個項目的 json[‘text’]
+包含需要處理的文字</p>
+<p>【任務需求】 1. 提取所有 Email 地址 2.
+提取所有電話號碼（台灣格式：02-1234-5678 或 0912-345-678） 3. 提取所有
+URL 4. 提取所有日期（YYYY-MM-DD, YYYY/MM/DD, DD-MM-YYYY） 5.
+遮罩敏感資訊（Email 顯示前 3 碼，電話顯示後 4 碼）</p>
+<p>【輸出格式】</p>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;json&#39;</span>: {</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;extracted&#39;</span>: {</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;emails&#39;</span>: [<span class="st">&#39;user@example.com&#39;</span>, ...],</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;phones&#39;</span>: [<span class="st">&#39;0912-345-678&#39;</span>, ...],</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;urls&#39;</span>: [<span class="st">&#39;https://example.com&#39;</span>, ...],</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;dates&#39;</span>: [<span class="st">&#39;2024-01-15&#39;</span>, ...]</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;maskedText&#39;</span>: <span class="st">&#39;聯絡我：use***@example.com 或 ****-345-678&#39;</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>【注意事項】 - 使用 Python re 模組 - 確保正規表達式的效能</p>
+<pre><code>
+### 2. 檔案處理
+
+#### Excel 多工作表處理
+</code></pre>
+<p>我需要在 n8n Python Code 節點中處理多工作表的 Excel 檔案。</p>
+<p>【環境】 - 已安裝：pandas, openpyxl -
+輸入：items[0][‘binary’][‘data’]（Excel 檔案的 bytes）</p>
+<p>【任務需求】 1. 讀取所有工作表 2. 對每個工作表： -
+提取第一列作為欄位名稱 - 過濾空行 - 計算每個工作表的記錄數 3.
+合併所有工作表的資料（加入來源工作表名稱欄位） 4. 生成摘要報告</p>
+<p>【輸出格式】</p>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;json&#39;</span>: {</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;summary&#39;</span>: {</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;totalSheets&#39;</span>: <span class="dv">3</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;sheetNames&#39;</span>: [<span class="st">&#39;Sheet1&#39;</span>, <span class="st">&#39;Sheet2&#39;</span>, <span class="st">&#39;Sheet3&#39;</span>],</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;totalRecords&#39;</span>: <span class="dv">150</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;combinedData&#39;</span>: [...]  <span class="co"># 所有資料</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>
+#### PDF 文字提取與分析
+</code></pre>
+<p>在 n8n Python Code 節點中，我需要提取 PDF 文字並進行分析。</p>
+<p>【環境】 - 已安裝：PyPDF2 或 pdfplumber -
+輸入：items[0][‘binary’][‘data’]（PDF 檔案的 bytes）</p>
+<p>【任務需求】 1. 提取所有頁面的文字內容 2. 文字分析： -
+總字數（中英文分別計算） - 總頁數 -
+提取所有標題（假設字體較大或有特定格式） -
+提取關鍵字（高頻詞彙，排除停用詞） 3. 建立目錄（如果有） 4.
+提取表格資料（如果有）</p>
+<p>【輸出格式】</p>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;json&#39;</span>: {</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;metadata&#39;</span>: {</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;totalPages&#39;</span>: <span class="dv">10</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;totalWords&#39;</span>: <span class="dv">5000</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;chineseChars&#39;</span>: <span class="dv">3000</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">&#39;englishWords&#39;</span>: <span class="dv">500</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;content&#39;</span>: <span class="st">&#39;...&#39;</span>,  <span class="co"># 完整文字</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;tableOfContents&#39;</span>: [...],</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;keywords&#39;</span>: [<span class="st">&#39;關鍵字1&#39;</span>, <span class="st">&#39;關鍵字2&#39;</span>, ...],</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;tables&#39;</span>: [...]  <span class="co"># 表格資料</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>
+### 3. 資料分析與機器學習
+
+#### 時間序列分析
+</code></pre>
+<p>我需要在 n8n Python Code 節點中進行時間序列資料分析。</p>
+<p>【環境】 - 已安裝：pandas, numpy, scipy -
+輸入：items[0][‘json’][‘timeSeries’]（時間序列資料）</p>
+<p>【資料格式】</p>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>[</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  {<span class="st">&quot;date&quot;</span>: <span class="st">&quot;2024-01-01&quot;</span>, <span class="st">&quot;value&quot;</span>: <span class="dv">100</span>},</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  {<span class="st">&quot;date&quot;</span>: <span class="st">&quot;2024-01-02&quot;</span>, <span class="st">&quot;value&quot;</span>: <span class="dv">105</span>},</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<p>【任務需求】 1. 計算移動平均（7天、30天） 2.
+檢測趨勢（上升/下降/持平） 3. 計算變化率（日變化、週變化） 4.
+識別異常值（使用 Z-score 方法） 5. 預測未來 7
+天的趨勢（簡單線性迴歸）</p>
+<p>【輸出格式】 包含分析結果和視覺化資料（供後續節點繪圖使用）</p>
+<pre><code>
+#### 文字相似度比較
+</code></pre>
+<p>在 n8n Python Code 節點中，我需要比較多個文字的相似度。</p>
+<p>【環境】 - 可用套件：difflib（標準庫）或 sklearn（如果已安裝） -
+輸入：items（列表），每個項目包含 json[‘text’]</p>
+<p>【任務需求】 1. 計算所有文字兩兩之間的相似度（使用餘弦相似度或
+Levenshtein 距離） 2. 找出最相似的文字對 3. 進行文字分群（相似度 &gt;
+80% 的歸為一組） 4. 提取每組的代表性關鍵字</p>
+<p>【輸出格式】</p>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;json&#39;</span>: {</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;similarityMatrix&#39;</span>: [[<span class="fl">1.0</span>, <span class="fl">0.85</span>, <span class="fl">0.3</span>], ...],</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;clusters&#39;</span>: [</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;id&#39;</span>: <span class="dv">1</span>,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;texts&#39;</span>: [<span class="dv">0</span>, <span class="dv">1</span>],  <span class="co"># 文字索引</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;keywords&#39;</span>: [<span class="st">&#39;關鍵字1&#39;</span>, <span class="st">&#39;關鍵字2&#39;</span>]</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;mostSimilarPairs&#39;</span>: [</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>      {<span class="st">&#39;text1&#39;</span>: <span class="dv">0</span>, <span class="st">&#39;text2&#39;</span>: <span class="dv">1</span>, <span class="st">&#39;similarity&#39;</span>: <span class="fl">0.95</span>}</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>
+---
+
+## 常見應用場景提示詞庫
+
+### 場景 1：CSV 資料清理與標準化
+
+**完整提示詞：**
+</code></pre>
+<p>【任務】在 n8n JavaScript Code 節點中清理和標準化 CSV 資料</p>
+<p>【環境】 - 輸入：$input.first().binary.data（Buffer 格式的 CSV） -
+無外部套件依賴（使用原生 JavaScript）</p>
+<p>【資料問題】 1. 欄位名稱不一致（有空格、大小寫不統一） 2.
+資料中有多餘的空白字元 3. 日期格式不統一（YYYY-MM-DD, YYYY/MM/DD,
+DD/MM/YYYY） 4. 電話號碼格式不統一（有破折號、括號、空格） 5.
+有空行和重複行 6. 數值欄位混有文字（如 “1,000” 或 “$100”）</p>
+<p>【清理步驟】 1. 標準化欄位名稱： - 轉小寫 - 空格替換為底線 -
+移除特殊字元 2. 清理資料值： - Trim 所有文字欄位 - 統一日期格式為
+YYYY-MM-DD - 統一電話格式為 XXXX-XXX-XXX -
+數值欄位移除非數字字元並轉換為數字 3. 移除空行和完全重複的行 4.
+驗證必填欄位（name, email）</p>
+<p>【輸出要求】 返回包含兩個項目的陣列： 1. 清理後的資料（JSON 格式） 2.
+清理報告（統計資訊）</p>
+<p>【報告內容】 - 原始記錄數 - 清理後記錄數 - 移除的重複行數 -
+移除的空行數 - 無效記錄數（及原因） - 每個欄位的清理統計</p>
+<p>請提供完整的程式碼，包含詳細註解。</p>
+<pre><code>
+### 場景 2：圖片批量處理（壓縮 + 縮圖 + 浮水印）
+
+**完整提示詞：**
+</code></pre>
+<p>【任務】在 n8n JavaScript Code 節點中批量處理圖片</p>
+<p>【環境】 - 已安裝：sharp - 輸入：<span
+class="math inline"><em>i</em><em>n</em><em>p</em><em>u</em><em>t</em>.<em>a</em><em>l</em><em>l</em>()，<em>每</em><em>個</em><em>項</em><em>目</em><em>的</em><em>b</em><em>i</em><em>n</em><em>a</em><em>r</em><em>y</em>.<em>d</em><em>a</em><em>t</em><em>a</em><em>是</em><em>圖</em><em>片</em><em>B</em><em>u</em><em>f</em><em>f</em><em>e</em><em>r</em> − <em>浮</em><em>水</em><em>印</em><em>圖</em><em>片</em>：</span>input.first().json.watermarkPath</p>
+<p>【處理需求】 1. <strong>壓縮</strong>： - JPEG 格式，品質 85% -
+啟用漸進式編碼 - 移除 EXIF 資料（隱私保護）</p>
+<ol start="2" type="1">
+<li><strong>縮放</strong>：
+<ul>
+<li>如果寬度 &gt; 2000px，縮放到 2000px</li>
+<li>如果高度 &gt; 2000px，縮放到 2000px</li>
+<li>保持寬高比</li>
+</ul></li>
+<li><strong>生成縮圖</strong>：
+<ul>
+<li>小：200x200px（裁切）</li>
+<li>中：600x600px（等比縮放）</li>
+<li>大：1200x1200px（等比縮放）</li>
+</ul></li>
+<li><strong>浮水印</strong>：
+<ul>
+<li>位置：右下角</li>
+<li>偏移：距離邊緣 20px</li>
+<li>不透明度：70%</li>
+<li>只在原圖加浮水印，縮圖不加</li>
+</ul></li>
+</ol>
+<p>【輸出格式】 每張原圖返回 4 個檔案： 1. 原圖壓縮版（含浮水印） 2.
+小縮圖 3. 中縮圖 4. 大縮圖</p>
+<p>每個輸出項目包含：</p>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">json</span><span class="op">:</span> {</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">originalFileName</span><span class="op">:</span> <span class="st">&quot;photo.jpg&quot;</span><span class="op">,</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">type</span><span class="op">:</span> <span class="st">&quot;original|small|medium|large&quot;</span><span class="op">,</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">originalSize</span><span class="op">:</span> <span class="dv">5242880</span><span class="op">,</span>  <span class="co">// bytes</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">compressedSize</span><span class="op">:</span> <span class="dv">1048576</span><span class="op">,</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">compressionRatio</span><span class="op">:</span> <span class="st">&quot;80%&quot;</span><span class="op">,</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">dimensions</span><span class="op">:</span> {<span class="dt">width</span><span class="op">:</span> <span class="dv">2000</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">1500</span>}</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">binary</span><span class="op">:</span> {</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">data</span><span class="op">:</span> <span class="bu">Buffer</span><span class="op">,</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mimeType</span><span class="op">:</span> <span class="st">&quot;image/jpeg&quot;</span><span class="op">,</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">fileName</span><span class="op">:</span> <span class="st">&quot;photo_original.jpg&quot;</span></span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>【效能要求】 - 使用 async/await 確保記憶體不溢出 - 每處理 10
+張圖片顯示進度 - 錯誤處理：單張圖片失敗不影響其他圖片</p>
+<p>請提供完整程式碼，包含錯誤處理和進度追蹤。</p>
+<pre><code>
+### 場景 3：多來源資料整合與比對
+
+**完整提示詞：**
+</code></pre>
+<p>【任務】在 n8n JavaScript Code 節點中整合和比對多個資料來源</p>
+<p>【輸入資料】 1. CRM 資料：<span
+class="math inline"><em>i</em><em>n</em><em>p</em><em>u</em><em>t</em>.<em>f</em><em>i</em><em>r</em><em>s</em><em>t</em>().<em>j</em><em>s</em><em>o</em><em>n</em>.<em>c</em><em>r</em><em>m</em><em>D</em><em>a</em><em>t</em><em>a</em>（<em>客</em><em>戶</em><em>資</em><em>料</em>）2.<em>E</em><em>R</em><em>P</em><em>資</em><em>料</em>：</span>input.first().json.erpData（訂單資料）
+3. Email 資料：$input.first().json.emailData（郵件互動記錄）</p>
+<p>【資料結構】</p>
+<div class="sourceCode" id="cb43"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">// CRM</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>[{<span class="dt">customerId</span><span class="op">:</span> <span class="st">&quot;C001&quot;</span><span class="op">,</span> <span class="dt">name</span><span class="op">:</span> <span class="st">&quot;張三&quot;</span><span class="op">,</span> <span class="dt">email</span><span class="op">:</span> <span class="st">&quot;zhang@example.com&quot;</span><span class="op">,</span> <span class="dt">phone</span><span class="op">:</span> <span class="st">&quot;0912345678&quot;</span>}]</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="co">// ERP</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>[{<span class="dt">orderId</span><span class="op">:</span> <span class="st">&quot;O001&quot;</span><span class="op">,</span> <span class="dt">customerId</span><span class="op">:</span> <span class="st">&quot;C001&quot;</span><span class="op">,</span> <span class="dt">amount</span><span class="op">:</span> <span class="dv">10000</span><span class="op">,</span> <span class="dt">date</span><span class="op">:</span> <span class="st">&quot;2024-01-15&quot;</span>}]</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a><span class="co">// Email</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>[{<span class="dt">email</span><span class="op">:</span> <span class="st">&quot;zhang@example.com&quot;</span><span class="op">,</span> <span class="dt">openCount</span><span class="op">:</span> <span class="dv">5</span><span class="op">,</span> <span class="dt">clickCount</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="dt">lastOpen</span><span class="op">:</span> <span class="st">&quot;2024-01-20&quot;</span>}]</span></code></pre></div>
+<p>【整合需求】 1. 以 customerId 為主鍵整合 CRM 和 ERP 2. 以 email
+為次要鍵整合 Email 資料 3. 處理資料不匹配的情況： - CRM 有但 ERP
+沒有的客戶（標記為”無訂單”） - ERP 有但 CRM
+沒有的訂單（標記為”異常訂單”） - Email 無法匹配的記錄（標記為”Email
+不符”）</p>
+<p>【分析需求】 1. 客戶價值分級： - VIP：訂單總額 &gt; 50000 -
+重要：訂單總額 10000-50000 - 一般：訂單總額 &lt; 10000 -
+潛在：有互動但無訂單 2. 客戶活躍度： - 活躍：最近 30 天有互動或訂單 -
+沉睡：30-90 天無互動 - 流失：90 天以上無互動</p>
+<p>【輸出格式】</p>
+<div class="sourceCode" id="cb44"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">json</span><span class="op">:</span> {</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">integratedData</span><span class="op">:</span> [</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">customerId</span><span class="op">:</span> <span class="st">&quot;C001&quot;</span><span class="op">,</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">customerInfo</span><span class="op">:</span> {<span class="op">...</span>}<span class="op">,</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">orders</span><span class="op">:</span> [<span class="op">...</span>]<span class="op">,</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">emailStats</span><span class="op">:</span> {<span class="op">...</span>}<span class="op">,</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">valueLevel</span><span class="op">:</span> <span class="st">&quot;VIP&quot;</span><span class="op">,</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">activeStatus</span><span class="op">:</span> <span class="st">&quot;活躍&quot;</span><span class="op">,</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">totalAmount</span><span class="op">:</span> <span class="dv">50000</span><span class="op">,</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">orderCount</span><span class="op">:</span> <span class="dv">5</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    ]<span class="op">,</span></span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">summary</span><span class="op">:</span> {</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>      <span class="dt">totalCustomers</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span></span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vipCount</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span></span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">activeCount</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">anomalies</span><span class="op">:</span> {</span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>        <span class="dt">unmatchedOrders</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>        <span class="dt">unmatchedEmails</span><span class="op">:</span> <span class="dv">5</span></span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">anomalies</span><span class="op">:</span> [</span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a>      {<span class="dt">type</span><span class="op">:</span> <span class="st">&quot;unmatchedOrder&quot;</span><span class="op">,</span> <span class="dt">data</span><span class="op">:</span> {<span class="op">...</span>}}</span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>請提供完整程式碼，使用 lodash 優化效能。</p>
+<pre><code>
+### 場景 4：影片字幕處理（SRT 解析、翻譯、合併）
+
+**完整提示詞：**
+</code></pre>
+<p>【任務】在 n8n JavaScript Code 節點中處理 SRT 字幕檔案</p>
+<p>【輸入資料】 - 原始字幕：<span
+class="math inline"><em>i</em><em>n</em><em>p</em><em>u</em><em>t</em>.<em>f</em><em>i</em><em>r</em><em>s</em><em>t</em>().<em>b</em><em>i</em><em>n</em><em>a</em><em>r</em><em>y</em>.<em>d</em><em>a</em><em>t</em><em>a</em>（<em>S</em><em>R</em><em>T</em><em>格</em><em>式</em><em>B</em><em>u</em><em>f</em><em>f</em><em>e</em><em>r</em>） − <em>翻</em><em>譯</em><em>字</em><em>幕</em>：</span>input.item(1).binary.data（另一個
+SRT 檔案） -
+時間調整：$input.first().json.timeOffset（秒數，可正可負）</p>
+<p>【處理步驟】 1. <strong>解析 SRT</strong>： -
+提取序號、時間軸、文字內容 - 處理多行字幕 - 處理特殊格式（HTML
+標籤、位置標記）</p>
+<ol start="2" type="1">
+<li><strong>時間軸調整</strong>：
+<ul>
+<li>根據 timeOffset 調整所有時間戳</li>
+<li>確保時間不會變成負數</li>
+<li>保持時間格式 HH:MM:SS,mmm</li>
+</ul></li>
+<li><strong>字幕合併</strong>（雙語字幕）：
+<ul>
+<li>原文在上，譯文在下</li>
+<li>確保時間軸對齊</li>
+<li>如果時間不完全匹配，找最接近的字幕配對</li>
+</ul></li>
+<li><strong>字幕清理</strong>：
+<ul>
+<li>移除廣告字幕（包含特定關鍵字）</li>
+<li>移除重複字幕</li>
+<li>合併過短的字幕片段（&lt; 1 秒）</li>
+</ul></li>
+</ol>
+<p>【SRT 格式範例】</p>
+<pre><code>1
+00:00:01,000 --&gt; 00:00:03,500
+這是第一段字幕
+
+2
+00:00:04,000 --&gt; 00:00:07,000
+這是第二段字幕
+可以有多行</code></pre>
+<p>【輸出格式】 返回三個 binary 檔案： 1. 調整後的原始字幕 2.
+調整後的翻譯字幕 3. 合併的雙語字幕</p>
+<p>每個檔案的 json 包含：</p>
+<div class="sourceCode" id="cb47"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fileName</span><span class="op">:</span> <span class="st">&quot;output.srt&quot;</span><span class="op">,</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">subtitleCount</span><span class="op">:</span> <span class="dv">150</span><span class="op">,</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">totalDuration</span><span class="op">:</span> <span class="st">&quot;01:30:45&quot;</span><span class="op">,</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">removedCount</span><span class="op">:</span> <span class="dv">5</span><span class="op">,</span>  <span class="co">// 清理掉的字幕數</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">adjustedBy</span><span class="op">:</span> <span class="st">&quot;+3.5s&quot;</span>  <span class="co">// 時間調整量</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>請提供完整程式碼，包含時間計算函數和清理邏輯。</p>
+<pre><code>
+### 場景 5：Excel 報表自動生成（含圖表）
+
+**完整提示詞：**
+</code></pre>
+<p>【任務】在 n8n JavaScript Code 節點中生成含圖表的 Excel 報表</p>
+<p>【環境】 - 已安裝：xlsx, exceljs（選其一，推薦 exceljs） -
+輸入：$input.first().json.salesData（銷售資料陣列）</p>
+<p>【資料格式】</p>
+<div class="sourceCode" id="cb49"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>[</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">date</span><span class="op">:</span> <span class="st">&quot;2024-01-01&quot;</span><span class="op">,</span> <span class="dt">product</span><span class="op">:</span> <span class="st">&quot;產品A&quot;</span><span class="op">,</span> <span class="dt">category</span><span class="op">:</span> <span class="st">&quot;電子&quot;</span><span class="op">,</span> <span class="dt">sales</span><span class="op">:</span> <span class="dv">10000</span><span class="op">,</span> <span class="dt">quantity</span><span class="op">:</span> <span class="dv">5</span>}<span class="op">,</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">date</span><span class="op">:</span> <span class="st">&quot;2024-01-02&quot;</span><span class="op">,</span> <span class="dt">product</span><span class="op">:</span> <span class="st">&quot;產品B&quot;</span><span class="op">,</span> <span class="dt">category</span><span class="op">:</span> <span class="st">&quot;食品&quot;</span><span class="op">,</span> <span class="dt">sales</span><span class="op">:</span> <span class="dv">5000</span><span class="op">,</span> <span class="dt">quantity</span><span class="op">:</span> <span class="dv">20</span>}<span class="op">,</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">...</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<p>【報表需求】 1. <strong>工作表結構</strong>： - Sheet1: 原始資料 -
+Sheet2: 依日期彙總 - Sheet3: 依產品彙總 - Sheet4: 依類別彙總 - Sheet5:
+圖表與分析</p>
+<ol start="2" type="1">
+<li><strong>格式要求</strong>：
+<ul>
+<li>標題列：粗體、背景色、凍結窗格</li>
+<li>數值格式：千分位、貨幣符號</li>
+<li>日期格式：YYYY-MM-DD</li>
+<li>自動調整欄寬</li>
+<li>交替行背景色（斑馬線）</li>
+</ul></li>
+<li><strong>彙總計算</strong>：
+<ul>
+<li>每個彙總表包含：
+<ul>
+<li>總銷售額</li>
+<li>平均銷售額</li>
+<li>最高/最低銷售額</li>
+<li>銷售佔比</li>
+<li>成長率（與前期比較）</li>
+</ul></li>
+</ul></li>
+<li><strong>圖表</strong>（Sheet5）：
+<ul>
+<li>圓餅圖：類別銷售佔比</li>
+<li>長條圖：各產品銷售額</li>
+<li>折線圖：日銷售趨勢</li>
+<li>表格：Top 10 產品</li>
+</ul></li>
+<li><strong>條件格式</strong>：
+<ul>
+<li>銷售額 &gt; 50000：綠色背景</li>
+<li>銷售額 &lt; 10000：紅色背景</li>
+<li>數量 &lt; 5：橘色警告</li>
+</ul></li>
+</ol>
+<p>【輸出格式】</p>
+<div class="sourceCode" id="cb50"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">binary</span><span class="op">:</span> {</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">data</span><span class="op">:</span> <span class="bu">Buffer</span><span class="op">,</span>  <span class="co">// Excel 檔案</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">mimeType</span><span class="op">:</span> <span class="st">&#39;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet&#39;</span><span class="op">,</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">fileName</span><span class="op">:</span> <span class="st">&#39;sales_report_2024.xlsx&#39;</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">json</span><span class="op">:</span> {</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">summary</span><span class="op">:</span> {</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">totalRows</span><span class="op">:</span> <span class="dv">1000</span><span class="op">,</span></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">totalSales</span><span class="op">:</span> <span class="dv">5000000</span><span class="op">,</span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">dateRange</span><span class="op">:</span> <span class="st">&quot;2024-01-01 to 2024-12-31&quot;</span><span class="op">,</span></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">categories</span><span class="op">:</span> <span class="dv">5</span><span class="op">,</span></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">products</span><span class="op">:</span> <span class="dv">50</span></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>請提供使用 exceljs 的完整程式碼，包含所有圖表和格式設定。</p>
+<pre><code>
+---
+
+## 除錯與優化提示詞
+
+### 除錯提示詞模板
+</code></pre>
+<p>【除錯請求】我的 n8n Code 節點執行時遇到錯誤</p>
+<p>【環境】 - 語言：[JavaScript / Python] - n8n 版本：[版本號] - Node.js
+版本：[版本號]（如果是 JavaScript）</p>
+<p>【原始程式碼】</p>
+<pre class="[語言]"><code>[貼上你的程式碼]</code></pre>
+<p>【錯誤訊息】</p>
+<pre><code>[完整的錯誤訊息]</code></pre>
+<p>【輸入資料範例】</p>
+<div class="sourceCode" id="cb54"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span><span class="er">提供實際的輸入資料</span><span class="ot">]</span></span></code></pre></div>
+<p>【預期行為】 [描述你期望的結果]</p>
+<p>【實際行為】 [描述實際發生的情況]</p>
+<p>【已嘗試的解決方法】 1. [方法 1] 2. [方法 2]</p>
+<p>請幫我找出問題並提供修正後的程式碼。</p>
+<pre><code>
+### 效能優化提示詞
+</code></pre>
+<p>【優化請求】我的 n8n Code 節點執行速度很慢</p>
+<p>【目前程式碼】</p>
+<div class="sourceCode" id="cb56"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>[貼上程式碼]</span></code></pre></div>
+<p>【效能問題】 - 處理時間：[例如：處理 1000 筆資料需要 30 秒] -
+記憶體使用：[如果知道的話] - 資料量：[輸入資料的規模]</p>
+<p>【優化目標】 - 期望處理時間：[例如：&lt; 5 秒] -
+記憶體限制：[如果有的話]</p>
+<p>【限制條件】 - 不能使用的套件：[列出限制] -
+必須保留的功能：[列出核心功能]</p>
+<p>請提供優化建議和改進後的程式碼，並說明優化原理。</p>
+<pre><code>
+### 程式碼重構提示詞
+</code></pre>
+<p>【重構請求】請幫我重構這段程式碼，使其更易維護</p>
+<p>【目前程式碼】</p>
+<div class="sourceCode" id="cb58"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>[貼上程式碼]</span></code></pre></div>
+<p>【問題】 - 程式碼重複 - 可讀性差 - 難以擴展 - [其他問題]</p>
+<p>【重構目標】 1. 提高可讀性（清楚的變數名、適當的註解） 2.
+減少重複程式碼（DRY 原則） 3. 模組化（分離關注點） 4. 錯誤處理（完善的
+try-catch） 5. 易於擴展（方便新增功能）</p>
+<p>【編碼風格偏好】 - [例如：使用 async/await 而非 Promise.then] -
+[例如：偏好函數式編程]</p>
+<p>請提供重構後的程式碼，並說明改進之處。</p>
+<pre><code>
+---
+
+## 進階技巧：提示詞優化
+
+### 1. 提供足夠的上下文
+
+**不好的提示詞：**</code></pre>
+<p>寫一個 n8n 程式碼處理資料</p>
+<pre><code>
+**好的提示詞：**</code></pre>
+<p>在 n8n JavaScript Code 節點中，處理來自前一個節點的 JSON 資料。
+輸入資料包含 100 個客戶記錄，每個記錄有 name、email、phone 欄位。
+我需要驗證 email 格式，並將無效記錄分離出來。
+請返回兩個陣列：validRecords 和 invalidRecords。</p>
+<pre><code>
+### 2. 分步驟描述複雜任務
+</code></pre>
+<p>【任務】批量處理訂單資料並生成報表</p>
+<p>【第一步】資料載入與驗證 - 從 $input.all() 讀取訂單資料 -
+驗證必填欄位：orderId, customerId, amount, date - 驗證資料型別：amount
+必須是數字，date 必須是有效日期</p>
+<p>【第二步】資料轉換 - 統一日期格式為 YYYY-MM-DD -
+金額四捨五入到小數點後 2 位 - 計算每筆訂單的稅金（amount * 0.05）</p>
+<p>【第三步】資料聚合 - 依客戶 ID 分組 -
+計算每個客戶的總訂單數、總金額、平均金額</p>
+<p>【第四步】報表生成 - 生成 CSV 格式的彙總報表 - 包含欄位：客戶
+ID、訂單數、總金額、平均金額、客戶等級</p>
+<p>【第五步】錯誤處理 - 記錄所有驗證失敗的訂單 -
+返回處理成功率和失敗原因</p>
+<p>請依照這些步驟提供完整程式碼，每個步驟加上註解。</p>
+<pre><code>
+### 3. 使用範例驅動開發
+</code></pre>
+<p>【任務】解析複雜的日誌檔案</p>
+<p>【範例輸入】</p>
+<pre><code>[2024-01-15 10:30:45] INFO: User login successful - UserID: 12345
+[2024-01-15 10:31:20] ERROR: Database connection failed - Code: 500
+[2024-01-15 10:32:10] WARNING: High memory usage - 85%</code></pre>
+<p>【範例輸出】</p>
+<div class="sourceCode" id="cb64"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>[</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">timestamp</span><span class="op">:</span> <span class="st">&quot;2024-01-15 10:30:45&quot;</span><span class="op">,</span></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">level</span><span class="op">:</span> <span class="st">&quot;INFO&quot;</span><span class="op">,</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">message</span><span class="op">:</span> <span class="st">&quot;User login successful&quot;</span><span class="op">,</span></span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">details</span><span class="op">:</span> {<span class="dt">UserID</span><span class="op">:</span> <span class="st">&quot;12345&quot;</span>}</span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">timestamp</span><span class="op">:</span> <span class="st">&quot;2024-01-15 10:31:20&quot;</span><span class="op">,</span></span>
+<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">level</span><span class="op">:</span> <span class="st">&quot;ERROR&quot;</span><span class="op">,</span></span>
+<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">message</span><span class="op">:</span> <span class="st">&quot;Database connection failed&quot;</span><span class="op">,</span></span>
+<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">details</span><span class="op">:</span> {<span class="dt">Code</span><span class="op">:</span> <span class="st">&quot;500&quot;</span>}</span>
+<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">timestamp</span><span class="op">:</span> <span class="st">&quot;2024-01-15 10:32:10&quot;</span><span class="op">,</span></span>
+<span id="cb64-16"><a href="#cb64-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">level</span><span class="op">:</span> <span class="st">&quot;WARNING&quot;</span><span class="op">,</span></span>
+<span id="cb64-17"><a href="#cb64-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">message</span><span class="op">:</span> <span class="st">&quot;High memory usage&quot;</span><span class="op">,</span></span>
+<span id="cb64-18"><a href="#cb64-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">details</span><span class="op">:</span> {<span class="dt">percentage</span><span class="op">:</span> <span class="st">&quot;85%&quot;</span>}</span>
+<span id="cb64-19"><a href="#cb64-19" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb64-20"><a href="#cb64-20" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div>
+<p>請提供能解析這種格式的程式碼，使用正規表達式提取資訊。</p>
+<pre><code>
+### 4. 指定程式碼風格
+</code></pre>
+<p>【任務】處理使用者輸入資料</p>
+<p>【程式碼風格要求】 1. 使用 ES6+ 語法（箭頭函數、解構賦值、模板字串）
+2. 優先使用 const，避免 var 3. 使用 async/await 而非 .then() 4.
+函數式編程風格（map, filter, reduce） 5. 詳細的 JSDoc 註解 6.
+每個函數不超過 20 行</p>
+<p>【命名規範】 - 變數：camelCase - 常數：UPPER_SNAKE_CASE -
+函數：動詞開頭（get, set, calculate, validate） - 布林值：is, has,
+should 開頭</p>
+<p>請提供符合這些規範的程式碼。</p>
+<pre><code>
+---
+
+## 快速參考：常用程式碼片段請求
+
+### JavaScript 快速請求
+</code></pre>
+<p>// 1. 陣列去重 “寫一個 n8n JavaScript 函數，根據 id 欄位對
+$input.all() 的資料去重”</p>
+<p>// 2. 深度複製物件 “在 n8n Code
+節點中深度複製物件，不使用外部套件”</p>
+<p>// 3. CSV 解析 “寫一個簡單的 CSV
+解析器，處理引號包圍的欄位和跳脫字元”</p>
+<p>// 4. 日期格式轉換 “寫一個函數將各種日期格式（YYYY-MM-DD, DD/MM/YYYY,
+MM-DD-YYYY）統一轉換為 ISO 8601”</p>
+<p>// 5. 檔案路徑處理 “提取檔案路徑的目錄、檔名、副檔名，不使用 path
+模組”</p>
+<p>// 6. 資料分頁 “將陣列資料分頁，每頁 50 筆，返回指定頁面的資料”</p>
+<p>// 7. 字串模糊搜尋 “實作 Levenshtein
+距離演算法，用於模糊比對字串”</p>
+<p>// 8. 物件陣列排序 “對物件陣列進行多欄位排序（先依 date 降序，再依
+amount 升序）”</p>
+<p>// 9. 遞迴處理巢狀物件 “遞迴遍歷巢狀物件，將所有字串值轉為大寫”</p>
+<p>// 10. 批次處理 “將 1000 筆資料分批處理，每批 100
+筆，避免記憶體溢出”</p>
+<pre><code>
+### Python 快速請求
+</code></pre>
+<p>// 1. DataFrame 操作 “用 pandas 讀取
+JSON，過濾、分組、聚合，返回結果”</p>
+<p>// 2. 正規表達式批次替換 “用 re 模組批次處理文字，替換多個模式”</p>
+<p>// 3. 檔案批次重命名 “用 os 模組批次重命名資料夾中的檔案”</p>
+<p>// 4. Excel 多工作表讀寫 “用 pandas 和 openpyxl
+讀取多個工作表，處理後寫入新檔案”</p>
+<p>// 5. 圖片處理 “用 PIL 批次調整圖片大小並加浮水印”</p>
+<p>// 6. JSON 深度合併 “遞迴合併多個巢狀 JSON 物件”</p>
+<p>// 7. 資料清理 “清理 DataFrame 中的缺失值、異常值、重複值”</p>
+<p>// 8. 文字分析 “分析文字的詞頻、提取關鍵字、生成詞雲資料”</p>
+<p>// 9. 時間序列處理 “用 pandas 處理時間序列，計算移動平均、變化率”</p>
+<p>// 10. 批次 API 請求 “使用 requests 批次呼叫
+API，加上重試機制和速率限制”</p>
+<pre><code>
+---
+
+## 提示詞檢查清單
+
+在提交提示詞之前，檢查是否包含：
+
+- [ ] 明確的任務描述
+- [ ] n8n 環境說明（JavaScript/Python）
+- [ ] 輸入資料格式和來源
+- [ ] 期望的輸出格式
+- [ ] 具體的處理步驟或邏輯
+- [ ] 範例資料（輸入和輸出）
+- [ ] 錯誤處理要求
+- [ ] 效能或限制條件
+- [ ] 程式碼風格偏好（如果有）
+- [ ] 是否需要詳細註解
+
+---
+
+## 實戰範例：完整對話流程
+
+### 範例對話
+
+**你的初次提示：**</code></pre>
+<p>我需要在 n8n JavaScript Code 節點中處理客戶資料。 輸入是 CSV
+檔案，包含姓名、Email、電話、地址。 我要驗證資料並輸出清理後的
+JSON。</p>
+<pre><code>
+**AI 可能的回應：**</code></pre>
+<p>我需要更多資訊來幫你寫出準確的程式碼：</p>
+<ol type="1">
+<li>CSV 檔案如何輸入？($input.first().binary.data?)</li>
+<li>驗證規則是什麼？（Email 格式？電話格式？）</li>
+<li>如果資料無效要如何處理？（跳過？記錄錯誤？）</li>
+<li>期望的 JSON 結構是什麼？</li>
+<li>是否需要去重？</li>
+<li>資料量大概多少？（影響效能考量）</li>
+</ol>
+<pre><code>
+**你的補充說明：**</code></pre>
+<ol type="1">
+<li><p>輸入：$input.first().binary.data（UTF-8 編碼的 CSV）</p></li>
+<li><p>驗證規則：</p>
+<ul>
+<li>Email 必須符合標準格式</li>
+<li>電話必須是台灣手機（09 開頭 10 碼）或市話</li>
+<li>姓名和地址不可為空</li>
+</ul></li>
+<li><p>無效資料要分離出來，並記錄錯誤原因</p></li>
+<li><p>輸出 JSON：</p>
+<div class="sourceCode" id="cb71"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">validRecords</span><span class="op">:</span> [<span class="op">...</span>]<span class="op">,</span></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">invalidRecords</span><span class="op">:</span> [{<span class="dt">record</span><span class="op">:</span> {<span class="op">...</span>}<span class="op">,</span> <span class="dt">errors</span><span class="op">:</span> [<span class="op">...</span>]}]<span class="op">,</span></span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">summary</span><span class="op">:</span> {<span class="dt">total</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span> <span class="dt">valid</span><span class="op">:</span> <span class="dv">85</span><span class="op">,</span> <span class="dt">invalid</span><span class="op">:</span> <span class="dv">15</span>}</span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div></li>
+<li><p>需要根據 Email 去重，保留第一筆</p></li>
+<li><p>資料量約 1000-5000 筆</p></li>
+</ol>
+<p>請提供完整程式碼，包含詳細註解和錯誤處理。 ```</p>
+<p><strong>AI 提供完整程式碼</strong></p>
+<hr />
+<h2 id="結語">結語</h2>
+<p>使用這份提示詞指南，你可以： 1. 快速生成高品質的 n8n Code 節點程式碼
+2. 減少來回溝通的次數 3. 獲得更準確、更符合需求的程式碼 4.
+學習如何更好地與 AI 協作</p>
+<p>記住：<strong>提示詞越詳細，AI
+的輸出越準確</strong>。不要吝嗇提供範例和上下文！</p>

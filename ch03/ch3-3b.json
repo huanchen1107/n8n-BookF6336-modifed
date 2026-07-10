@@ -1,0 +1,201 @@
+{
+  "name": "ch3-3b",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2d2fb6b7-0c68-460b-b18c-b24527fe63ec",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d14682e-2f4d-41e8-93b5-e10aaf4cf6d1",
+              "name": "product_image_url",
+              "value": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800",
+              "type": "string"
+            },
+            {
+              "id": "bdb1b23a-f8f7-4a22-baee-c8665c03b9b2",
+              "name": "product_category",
+              "value": "手錶",
+              "type": "string"
+            },
+            {
+              "id": "6dcdf692-9bb6-49f3-bcf1-8d32c306495f",
+              "name": "brand",
+              "value": "未知品牌",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "979439b3-9727-447e-b481-67b54e8a3f92",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.product_image_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        320,
+        0
+      ],
+      "id": "d1806c60-1104-422a-8ba6-9bd008af77b4",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "=請仔細分析這張{{$json.product_category}}的產品圖片,根據圖片中實際看到的視覺元素生成完整的產品描述。\n重要指示:\n- 仔細觀察圖片中的所有視覺細節\n- 描述你實際看到的顏色、形狀、材質、設計元素\n- 根據視覺特徵推測產品功能和用途\n- 只描述圖片中可見的內容,不要編造不存在的特徵\n請按照以下格式輸出:\n【產品名稱】\n(根據圖片中看到的設計風格和特徵,創造一個吸引人的產品名稱)\n【產品類別】\n{{$json.product_category}}\n【品牌】\n{{$json.brand}}\n【主要特徵】\n(列出3-5個你從圖片中觀察到的關鍵特徵,例如:)\n- 顏色特徵(例如:純白色設計、黑色螢幕等)\n- 材質特徵(例如:矽膠錶帶、金屬錶殼等)\n- 設計特徵(例如:圓形錶面、極簡風格等)\n- 功能特徵(根據外觀推測,例如:觸控螢幕、運動追蹤等)",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "02546b28-1506-4a1b-a53b-54e7642cc68d",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "oNIFwXwzzn5QyzNJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "['0'].content[0].text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        0
+      ],
+      "id": "00a273b5-a911-4519-8371-861bf6198aec",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:\\n8n-data\\ch03\\answer4.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        0
+      ],
+      "id": "ab382c77-0b26-48a3-8cae-8d725f2b556a",
+      "name": "Read/Write Files from Disk"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e1c37f39-e98c-40c0-ad7f-b455f7fa0975",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "WnAJTEg9mtsfFdRU",
+  "tags": []
+}

@@ -1,0 +1,110 @@
+{
+  "name": "ch4-6a",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        128
+      ],
+      "id": "69d9513e-dfbe-46c1-92c5-cb87b91de6ac",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:/n8n-data/ch04/customer_service_result.xlsx",
+        "operation": "clearRows",
+        "sheetNameOptions": "技術類"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        128
+      ],
+      "id": "06fe1374-b512-4d56-addc-9696aa1e6277",
+      "name": "Clear rows in Excel"
+    },
+    {
+      "parameters": {
+        "filePath": "C:/n8n-data/ch04/customer_service_result.xlsx",
+        "operation": "clearRows",
+        "sheetNameOptions": "業務類"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        128
+      ],
+      "id": "4e35e477-0880-4751-8f63-4a7d92d279d1",
+      "name": "Clear rows in Excel1"
+    },
+    {
+      "parameters": {
+        "filePath": "C:/n8n-data/ch04/customer_service_result.xlsx",
+        "operation": "clearRows",
+        "sheetNameOptions": "物流類"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        128
+      ],
+      "id": "3a7ffa54-c162-4e62-8b3f-bc932a3c57d2",
+      "name": "Clear rows in Excel2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Clear rows in Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear rows in Excel": {
+      "main": [
+        [
+          {
+            "node": "Clear rows in Excel1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear rows in Excel1": {
+      "main": [
+        [
+          {
+            "node": "Clear rows in Excel2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "475793e3-c649-490e-8909-9e69dc801875",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "s3OjiAl650nru6KH",
+  "tags": []
+}

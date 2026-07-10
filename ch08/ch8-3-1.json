@@ -1,0 +1,136 @@
+{
+  "name": "ch8-3-1",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d5e3195f-46a0-4ee4-852a-c43b82c519ba",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        592,
+        400
+      ],
+      "webhookId": "47e6748b-6c1e-4d17-bee1-b2cadd33f4ac",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是一位n8n專家的AI助理。\n\n你可以使用以下工具：\n\n## Calculator\n當使用者要求你進行任何數學計算時，請使用此工具，例如：\n- 加法、減法、乘法、除法\n- 百分比計算\n- 複雜的數學公式或運算式\n\n重要：所有涉及數字的計算，都必須透過 Calculator 工具來執行，不可自行心算或估算。"
+        }
+      },
+      "id": "0ebb54d5-29dd-4a9b-aea3-d4c3604628a0",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        832,
+        400
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "model": "llama3.1:8b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        704,
+        592
+      ],
+      "id": "6eea43f1-a297-4f8a-8e58-b690442e4c7f",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "EmWfBTlgl0dbD2WL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        592
+      ],
+      "id": "ed85e1ee-d204-431b-abfe-66d5bf47422e",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        592
+      ],
+      "id": "0570b42f-36ea-4d6d-9932-80f7b7b71e13",
+      "name": "Calculator"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "aae4a84d-e4e1-4690-b2cf-d5a73ce5cec9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "YkSLxlu1Tp6I97cW",
+  "tags": []
+}

@@ -1,0 +1,267 @@
+{
+  "name": "ch4-4a",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1a2ffa04-2999-45f8-8cc4-13cf1fc14b03",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\飲料訂單資料.xlsx",
+        "sheetNameOptions": "訂單資料"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        352,
+        0
+      ],
+      "id": "2a53507e-a0ee-4dcb-ac9b-3af82d1083fc",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "訂單編號",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        16,
+        224
+      ],
+      "id": "ba3f56b9-bbe8-4e43-bf90-c29e415de853",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "數量"
+            },
+            {
+              "aggregation": "average",
+              "field": "單價"
+            },
+            {
+              "aggregation": "sum",
+              "field": "總價"
+            },
+            {
+              "aggregation": "countUnique",
+              "field": "訂單編號"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "飲料",
+        "options": {
+          "skipEmptySplitFields": false
+        }
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        192,
+        224
+      ],
+      "id": "f44f2e89-b08c-47e6-a82b-bc1f6c9de1fc",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "36eb947c-482a-4200-8abd-5f66c629c9bb",
+              "name": "飲料",
+              "value": "={{ $json.飲料 }}",
+              "type": "string"
+            },
+            {
+              "id": "d76abcf3-74ff-455f-90af-ba298c59a3da",
+              "name": "總銷售數量",
+              "value": "={{ $json.sum_數量 }}",
+              "type": "number"
+            },
+            {
+              "id": "9656d611-5334-40a0-a642-4ab1ecae11d5",
+              "name": "平均單價",
+              "value": "={{ $json.average_單價 }}",
+              "type": "number"
+            },
+            {
+              "id": "faecc776-7e2e-4649-9167-1d99676811b5",
+              "name": "總銷售金額",
+              "value": "={{ $json.sum_總價 }}",
+              "type": "number"
+            },
+            {
+              "id": "01d36899-ce86-4295-9b97-eeaa9b69ec7b",
+              "name": "訂單筆數",
+              "value": "={{ $json.unique_count_訂單編號 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        352,
+        224
+      ],
+      "id": "4eaf0356-fec7-4540-abfa-2967a8a11cf9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\飲料訂單資料.xlsx",
+        "operation": "clearRows",
+        "sheetNameOptions": "銷售統計"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "43232cbb-fada-480b-b5ed-85b58396b52f",
+      "name": "Clear rows in Excel",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\飲料訂單資料.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "銷售統計",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        672,
+        224
+      ],
+      "id": "f0313656-f5a6-4aba-aa76-8fb90687b0ae",
+      "name": "Add row to Excel"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "=飲料",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        512,
+        224
+      ],
+      "id": "703d802e-55da-435f-b9c8-be6301faf667",
+      "name": "Split Out"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Clear rows in Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear rows in Excel": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Add row to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "23b1be84-9d68-4f8f-9f3c-b1c1e96eeb86",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "ijaYbDNBGknBhlIH",
+  "tags": []
+}

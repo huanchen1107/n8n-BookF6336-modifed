@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手搖飲訂單</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    // ── 設定 Webhook URL（部署時修改此變數）──
+    const WEBHOOK_URL = "http://localhost:5678/webhook-test/drink-order";
+  </script>
+  <style>
+    :root {
+      --bg:        #0f0e0c;
+      --surface:   #1a1814;
+      --border:    #2e2b26;
+      --accent:    #e8a020;
+      --accent2:   #c85a2a;
+      --text:      #f0ead8;
+      --muted:     #7a7060;
+      --success:   #4caf6e;
+      --error:     #e05050;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Serif TC', serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232,160,32,0.12) 0%, transparent 70%),
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 40px);
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* ── Header ── */
+    .brand {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .brand-icon {
+      font-size: 3.5rem;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+    .brand h1 {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-top: .5rem;
+    }
+    .brand p {
+      color: var(--muted);
+      font-size: .85rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-top: .3rem;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(232,160,32,.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 1.4rem; }
+    .field label {
+      display: block;
+      font-size: .78rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: .55rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: .6rem;
+      padding: .75rem 1rem;
+      color: var(--text);
+      font-family: 'Noto Serif TC', serif;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(232,160,32,.15);
+    }
+
+    /* custom select arrow */
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 1rem; top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      pointer-events: none;
+      font-size: .9rem;
+    }
+
+    /* quantity row */
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .qty-btn {
+      width: 2.4rem; height: 2.4rem;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: .5rem;
+      color: var(--text);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+      flex-shrink: 0;
+    }
+    .qty-btn:hover { background: var(--accent); color: var(--bg); }
+    input#qty {
+      width: 4rem;
+      text-align: center;
+      padding: .65rem .5rem;
+      flex-shrink: 0;
+    }
+
+    /* price preview */
+    .price-preview {
+      margin: 1.6rem 0;
+      background: rgba(232,160,32,.08);
+      border: 1px solid rgba(232,160,32,.25);
+      border-radius: .75rem;
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .price-preview span:first-child {
+      font-size: .8rem;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .price-amount {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* submit */
+    .btn-submit {
+      width: 100%;
+      padding: .9rem;
+      border: none;
+      border-radius: .75rem;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #0f0e0c;
+      font-family: 'Noto Serif TC', serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: .08em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn-submit:hover { opacity: .9; }
+    .btn-submit:active { transform: scale(.98); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      top: 1.5rem; left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: .75rem;
+      padding: 1rem 1.5rem;
+      min-width: 260px;
+      max-width: 90vw;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+      z-index: 9999;
+      text-align: center;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: var(--success); }
+    #toast.error   { border-color: var(--error); }
+    .toast-icon   { font-size: 2rem; display: block; margin-bottom: .4rem; }
+    .toast-title  { font-weight: 700; font-size: 1rem; margin-bottom: .2rem; }
+    .toast-detail { font-size: .82rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+    /* loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 1em; height: 1em;
+      border: 2px solid rgba(0,0,0,.3);
+      border-top-color: #0f0e0c;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: .4em;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* config banner */
+    .config-banner {
+      background: rgba(200,90,42,.1);
+      border: 1px solid rgba(200,90,42,.3);
+      border-radius: .6rem;
+      padding: .75rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: .8rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--accent2);
+    }
+    .config-banner strong { display: block; margin-bottom: .3rem; }
+    .config-url {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed var(--accent2);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: .8rem;
+      padding: .25rem 0;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="brand">
+    <span class="brand-icon">🧋</span>
+    <h1>手搖飲訂單</h1>
+    <p>Bubble Tea Order System</p>
+  </div>
+
+  <div class="card">
+    <!-- 姓名 -->
+    <div class="field">
+      <label>姓名</label>
+      <input type="text" id="name" placeholder="請輸入您的姓名" required>
+    </div>
+
+    <!-- 飲料 -->
+    <div class="field">
+      <label>飲料選擇</label>
+      <div class="select-wrap">
+        <select id="drink" onchange="updatePrice()">
+          <option value="珍珠奶茶" data-price="60">珍珠奶茶 — NT$60</option>
+          <option value="冬瓜檸檬" data-price="55">冬瓜檸檬 — NT$55</option>
+          <option value="烏龍綠茶" data-price="55">烏龍綠茶 — NT$55</option>
+          <option value="黑糖鮮奶" data-price="70">黑糖鮮奶 — NT$70</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 甜度 & 冰塊 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="field">
+        <label>甜度</label>
+        <div class="select-wrap">
+          <select id="sugar">
+            <option>無糖</option>
+            <option>微糖</option>
+            <option selected>半糖</option>
+            <option>全糖</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>冰塊</label>
+        <div class="select-wrap">
+          <select id="ice">
+            <option>去冰</option>
+            <option>微冰</option>
+            <option selected>少冰</option>
+            <option>正常冰</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 數量 -->
+    <div class="field">
+      <label>數量</label>
+      <div class="qty-row">
+        <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+        <input type="number" id="qty" value="1" min="1" max="20" oninput="updatePrice()">
+        <button type="button" class="qty-btn" onclick="changeQty(1)">＋</button>
+      </div>
+    </div>
+
+    <!-- 小計 -->
+    <div class="price-preview">
+      <span>小計金額</span>
+      <span class="price-amount" id="total">NT$60</span>
+    </div>
+
+    <!-- Submit -->
+    <button class="btn-submit" id="submitBtn" onclick="submitOrder()">
+      送出訂單
+    </button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast">
+  <span class="toast-icon" id="toastIcon">✅</span>
+  <div class="toast-title" id="toastTitle"></div>
+  <div class="toast-detail" id="toastDetail"></div>
+</div>
+
+<script>
+  // ── Price table ──
+  const PRICES = { '珍珠奶茶': 60, '冬瓜檸檬': 55, '烏龍綠茶': 55, '黑糖鮮奶': 70 };
+
+  function getUnitPrice() {
+    return PRICES[document.getElementById('drink').value] || 55;
+  }
+
+  function updatePrice() {
+    const qty   = Math.max(1, parseInt(document.getElementById('qty').value) || 1);
+    const price = getUnitPrice() * qty;
+    document.getElementById('total').textContent = `NT$${price}`;
+  }
+
+  function changeQty(delta) {
+    const input = document.getElementById('qty');
+    const val   = Math.min(20, Math.max(1, (parseInt(input.value) || 1) + delta));
+    input.value = val;
+    updatePrice();
+  }
+
+  // ── Toast ──
+  let toastTimer;
+  function showToast(type, icon, title, detail) {
+    const t = document.getElementById('toast');
+    t.className = `show ${type}`;
+    document.getElementById('toastIcon').textContent  = icon;
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastDetail').textContent = detail;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = ''; }, 4000);
+  }
+
+  // ── Submit ──
+  async function submitOrder() {
+    const webhookUrl = WEBHOOK_URL;
+    const name  = document.getElementById('name').value.trim();
+    const drink = document.getElementById('drink').value;
+    const sugar = document.getElementById('sugar').value;
+    const ice   = document.getElementById('ice').value;
+    const qty   = parseInt(document.getElementById('qty').value) || 1;
+
+    if (!name) {
+      showToast('error', '⚠️', '請輸入姓名', '姓名欄位不能為空');
+      document.getElementById('name').focus();
+      return;
+    }
+
+    const unitPrice = getUnitPrice();
+    const payload   = {
+      姓名: name,
+      飲料: drink,
+      甜度: sugar,
+      冰塊: ice,
+      數量: qty,
+      單價: unitPrice,
+      小計: unitPrice * qty
+    };
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>傳送中…';
+
+    try {
+      const res = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      let data = {};
+      try { data = await res.json(); } catch (_) {}
+
+      if (res.ok) {
+        showToast('success', '🧋', '訂單已成功送出！',
+          `${name}的${drink} × ${qty} 已記錄到 Excel`);
+        // reset form
+        document.getElementById('name').value = '';
+        document.getElementById('drink').selectedIndex = 0;
+        document.getElementById('sugar').selectedIndex = 2;
+        document.getElementById('ice').selectedIndex = 1;
+        document.getElementById('qty').value = 1;
+        updatePrice();
+      } else {
+        const msg = data?.message || `HTTP ${res.status}`;
+        showToast('error', '❌', '送出失敗', msg);
+      }
+    } catch (err) {
+      showToast('error', '❌', '無法連線至伺服器',
+        err.message || '請確認 n8n Webhook URL 是否正確且已啟動');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '送出訂單';
+    }
+  }
+
+  // init price
+  updatePrice();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+請為 n8n Code 節點 (JavaScript) 寫聚合統計程式碼。
+輸入：const items = $input.all()
+資料範例：
+[輸入 JSON]
+統計需求：
+- 按 [欄位名，如 category] 分組
+- 計算每組的 [sum/avg/count]
+- 使用 Array.reduce() 或 forEach 實現
+輸出格式：return 統計結果陣列 [{json: {group: '...', total: ...}}]

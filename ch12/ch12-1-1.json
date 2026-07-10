@@ -1,0 +1,35 @@
+{
+  "name": "ch12-1-1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "linebot",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "aa37b838-f807-4950-8aa9-33766616d638",
+      "name": "Webhook",
+      "webhookId": "b7893440-0fd7-4084-bd24-a953311729c2"
+    }
+  ],
+  "pinData": {},
+  "connections": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "958d8f5d-dedc-42ef-bb57-4f46e7262043",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "Yc69FHMbyC2DZfB8",
+  "tags": []
+}

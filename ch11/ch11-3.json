@@ -1,0 +1,463 @@
+{
+  "name": "ch11-3",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "292a9d9d-a52f-4d17-a740-d3f4ecffed58",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -960,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "hueyanchen2020@gmail.com",
+          "mode": "id"
+        },
+        "limit": 10,
+        "timeMax": "={{ $now.plus({hours: 24}) }}",
+        "options": {}
+      },
+      "id": "2fe25fa2-e337-4109-a923-f3b6e14ebd18",
+      "name": "Google Calendar - 讀取事件",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -784,
+        -128
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "q4QhEg7UHWlF3uDg",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst now = new Date();\nconst processedMeetings = [];\n\nfor (const item of items) {\n  const meeting = item.json;\n  const startTime = new Date(meeting.start?.dateTime || meeting.start?.date);\n  const hoursUntil = (startTime - now) / (1000 * 60 * 60);\n\n  // 只處理1~3小時內即將開始的會議\n  if (hoursUntil > 0 && hoursUntil <= 3) {\n    processedMeetings.push({\n      json: {\n        id: meeting.id,\n        summary: meeting.summary || '(無標題會議)',\n        description: meeting.description || '',\n        startTime: meeting.start?.dateTime || meeting.start?.date,\n        endTime: meeting.end?.dateTime || meeting.end?.date,\n        attendees: meeting.attendees || [],\n        location: meeting.location || '線上會議',\n        hoursUntil: Number(hoursUntil.toFixed(1)),\n        meetingLink: meeting.hangoutLink ||\n                     meeting.conferenceData?.entryPoints?.[0]?.uri ||\n                     meeting.location || ''\n      }\n    });\n  }\n}\n\nreturn processedMeetings;"
+      },
+      "id": "5a6eef61-568c-4f22-a1d2-ab50631dfb70",
+      "name": "篩選1-3小時內會議",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1q_OP1A9yt47D9Cyg2s_GtMTpppwz898JMlzh6NLUFEk",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1809909438,
+          "mode": "list",
+          "cachedResultName": "會議提醒記錄",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1q_OP1A9yt47D9Cyg2s_GtMTpppwz898JMlzh6NLUFEk/edit#gid=1809909438"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "會議ID",
+              "lookupValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8679b824-7c69-4b29-91a5-738002ee0f3e",
+      "name": "Google Sheets - 查詢是否已提醒",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -416,
+        -128
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dfRMztFz1qZVb7av",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-not-reminded",
+              "leftValue": "={{ $json['會議ID'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d0295771-c376-47bc-83fb-561d4015f23f",
+      "name": "IF - 尚未發送提醒?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -880,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 組合提醒郵件 HTML 內容\nconst meeting = $('篩選1-3小時內會議').item.json;\nconst aiContent = $input.first().json.message?.content || $input.first().json.content || $input.first().json.text || '（AI建議產生失敗，請手動確認）';\n\nconst attendeeEmails = meeting.attendees\n  .filter(a => a.email)\n  .map(a => a.email)\n  .join(', ');\n\nconst startFormatted = new Date(meeting.startTime).toLocaleString('zh-TW', {\n  year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit', hour12: false\n});\n\nconst aiHtml = aiContent\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\\n/g, '<br>');\n\nconst emailHtml = `\n<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<style>\n  body { font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }\n  .header { background: linear-gradient(135deg, #1F3864, #2E75B6); color: white; padding: 20px 24px; border-radius: 8px 8px 0 0; }\n  .header h2 { margin: 0; font-size: 20px; }\n  .header p { margin: 6px 0 0; opacity: 0.85; font-size: 13px; }\n  .body { background: #f9fbfd; border: 1px solid #d0e0f0; border-top: none; border-radius: 0 0 8px 8px; padding: 20px 24px; }\n  .info-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }\n  .info-table td { padding: 8px 10px; font-size: 14px; }\n  .info-table .label { background: #e8f0fb; font-weight: bold; color: #1F3864; width: 110px; border-radius: 4px; }\n  .ai-box { background: #fff; border-left: 4px solid #2E75B6; padding: 14px 16px; border-radius: 0 6px 6px 0; margin-top: 4px; font-size: 13px; line-height: 1.7; }\n  .section-title { font-size: 15px; font-weight: bold; color: #1F3864; margin: 18px 0 8px; }\n  .countdown { display: inline-block; background: #FF6B35; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; }\n  .footer { text-align: center; font-size: 11px; color: #999; margin-top: 20px; }\n  .btn { display: inline-block; background: #2E75B6; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; margin-top: 12px; }\n</style>\n</head>\n<body>\n<div class=\"header\">\n  <h2>📅 會議提醒通知</h2>\n  <p>您有一場會議即將開始，請做好準備</p>\n</div>\n<div class=\"body\">\n  <span class=\"countdown\">⏰ ${meeting.hoursUntil} 小時後開始</span>\n  <table class=\"info-table\" style=\"margin-top:14px\">\n    <tr><td class=\"label\">會議主題</td><td>${meeting.summary}</td></tr>\n    <tr><td class=\"label\">開始時間</td><td>${startFormatted}</td></tr>\n    <tr><td class=\"label\">地點 / 連結</td><td>${meeting.location}</td></tr>\n    ${meeting.meetingLink && meeting.meetingLink !== meeting.location ? `<tr><td class=\"label\">會議連結</td><td><a href=\"${meeting.meetingLink}\" style=\"color:#2E75B6\">${meeting.meetingLink}</a></td></tr>` : ''}\n    ${meeting.description ? `<tr><td class=\"label\">會議說明</td><td>${meeting.description}</td></tr>` : ''}\n  </table>\n  <div class=\"section-title\">🤖 AI 會議助理建議</div>\n  <div class=\"ai-box\">${aiHtml}</div>\n  ${meeting.meetingLink ? `<a class=\"btn\" href=\"${meeting.meetingLink}\">立即加入會議</a>` : ''}\n</div>\n<div class=\"footer\">此為自動提醒郵件，由 n8n 會議助理系統發送</div>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    to: attendeeEmails,\n    subject: `⏰ 會議提醒：${meeting.summary}（${meeting.hoursUntil} 小時後）`,\n    html: emailHtml,\n    meetingId: meeting.id,\n    meetingTitle: meeting.summary,\n    meetingTime: meeting.startTime,\n    meetingEndTime: meeting.endTime,\n    reminderSentAt: new Date().toISOString(),\n    attendeeCount: meeting.attendees.length\n  }\n}];"
+      },
+      "id": "ed1b437f-5f8a-4ac1-a38f-380cbf683305",
+      "name": "組合提醒郵件內容",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "54e40fc3-501a-4f37-b5bc-af0c4e1e1610",
+      "name": "Gmail - 發送提醒郵件",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -224,
+        16
+      ],
+      "webhookId": "939c7c7a-38a0-480c-9ecb-a12ee81cfd86",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jltPpBTFenD5gs9t",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1q_OP1A9yt47D9Cyg2s_GtMTpppwz898JMlzh6NLUFEk",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1809909438,
+          "mode": "list",
+          "cachedResultName": "會議提醒記錄",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1q_OP1A9yt47D9Cyg2s_GtMTpppwz898JMlzh6NLUFEk/edit#gid=1809909438"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "會議ID": "={{ $('組合提醒郵件內容').item.json.meetingId }}",
+            "會議主題": "={{ $('組合提醒郵件內容').item.json.meetingTitle }}",
+            "會議時間": "={{ $('組合提醒郵件內容').item.json.meetingTime }}",
+            "提醒發送時間": "={{ $('組合提醒郵件內容').item.json.reminderSentAt }}",
+            "收件者": "={{ $('組合提醒郵件內容').item.json.to }}"
+          },
+          "matchingColumns": [
+            "會議ID"
+          ],
+          "schema": [
+            {
+              "id": "會議ID",
+              "displayName": "會議ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "會議主題",
+              "displayName": "會議主題",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "會議時間",
+              "displayName": "會議時間",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "提醒發送時間",
+              "displayName": "提醒發送時間",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "收件者",
+              "displayName": "收件者",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e7f4eb6b-1b8a-4ba4-9abd-4765bbfbfb87",
+      "name": "Google Sheets - 記錄提醒狀態",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -32,
+        -80
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dfRMztFz1qZVb7av",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "hueyanchen2020@gmail.com",
+          "mode": "id"
+        },
+        "start": "={{ $('篩選1-3小時內會議').item.json.startTime }}",
+        "end": "={{ $('篩選1-3小時內會議').item.json.endTime }}",
+        "additionalFields": {
+          "description": "=提醒已於 {{ $now.toISO() }} 自動發送\n收件者：{{ $('組合提醒郵件內容').item.json.to }}",
+          "summary": "=[已提醒] {{ $('篩選1-3小時內會議').item.json.summary }}"
+        }
+      },
+      "id": "46df5962-05a3-4156-9c66-1bc0a1868170",
+      "name": "Google Calendar - 建立提醒記錄事件",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        128
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "q4QhEg7UHWlF3uDg",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=會議資訊如下，請生成會議準備清單：\n\n主題：{{ $('篩選1-3小時內會議').item.json.summary }}\n時間：{{ $('篩選1-3小時內會議').item.json.startTime }}\n地點：{{ $('篩選1-3小時內會議').item.json.location }}\n說明：{{ $('篩選1-3小時內會議').item.json.description }}\n與會人數：{{ $('篩選1-3小時內會議').item.json.attendees.length }} 人\n距離開始：{{ $('篩選1-3小時內會議').item.json.hoursUntil }} 小時\n\n請依序提供：\n1. 📌 會議重點提醒（3-5點）\n2. ✅ 建議準備事項\n3. 💬 可能討論議題\n4. 📂 需要準備的資料或文件\n\n以條列方式呈現，語氣友善專業，使用繁體中文。\n"
+            },
+            {
+              "role": "system",
+              "content": "你是一個專業的會議助理，請以友善專業的語氣用繁體中文回應，提供實用的會議準備建議。"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -672,
+        112
+      ],
+      "id": "9bb97389-0380-4849-bbfc-4a9cfae8d5a9",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "oNIFwXwzzn5QyzNJ",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar - 讀取事件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar - 讀取事件": {
+      "main": [
+        [
+          {
+            "node": "篩選1-3小時內會議",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "篩選1-3小時內會議": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - 查詢是否已提醒",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - 查詢是否已提醒": {
+      "main": [
+        [
+          {
+            "node": "IF - 尚未發送提醒?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - 尚未發送提醒?": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "組合提醒郵件內容": {
+      "main": [
+        [
+          {
+            "node": "Gmail - 發送提醒郵件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - 發送提醒郵件": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - 記錄提醒狀態",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - 記錄提醒狀態": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar - 建立提醒記錄事件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "組合提醒郵件內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "3151d677-3cda-4035-a6d6-2f5deebf1b2b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "pt6UQTEktmADDZdo",
+  "tags": [
+    {
+      "updatedAt": "2026-03-25T13:46:33.062Z",
+      "createdAt": "2026-03-25T13:46:33.062Z",
+      "id": "0gOHuqH4C40yLIEE",
+      "name": "Google Calendar"
+    },
+    {
+      "updatedAt": "2026-03-25T13:46:33.073Z",
+      "createdAt": "2026-03-25T13:46:33.073Z",
+      "id": "iwcgnAb8MKO6Niw3",
+      "name": "AI會議助理"
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "name": "ch6-1-3",
+  "nodes": [
+    {
+      "parameters": {
+        "cityName": "={{ $json.query }}",
+        "language": "en"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "972240ef-0308-42ae-8e6c-02d7fc486b67",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "YqZxlWFtMyOr71Xw",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9536e636-7d82-4faf-9467-bdcd30c4dacb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eeceba17-bd1a-4d69-af16-d6b15aea101c",
+              "name": "query",
+              "value": "Taipei",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "f2a6fc0f-bd15-4855-9385-2f955be3801b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hueyanchen2020@gmail.com",
+        "toEmail": "test@example.com",
+        "subject": "今天台北天氣通知",
+        "emailFormat": "text",
+        "text": "=您好，\n\n今日台北天氣為：{{ $node[\"OpenWeatherMap\"].json[\"weather\"][0][\"description\"] }}。\n目前氣溫：{{ $node[\"OpenWeatherMap\"].json[\"main\"][\"temp\"] }}°C。\n\n祝您有美好的一天！\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "59eb8df4-a5de-4845-b257-9276c8be872a",
+      "name": "Send an Email",
+      "webhookId": "c8fcdf76-21c9-4ba8-bae8-a2e9dbe9231f",
+      "credentials": {
+        "smtp": {
+          "id": "UM06ssDnTxzoirMQ",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5976a828-3e25-4c8e-9d72-380ec282b514",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "2P7ghofW3PQoBDee",
+  "tags": []
+}

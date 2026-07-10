@@ -1,0 +1,6 @@
+請為 n8n Code 節點寫 JavaScript 程式碼。
+輸入資料 ($input.all())：
+[輸入你的 JSON 範例]
+需求：將資料轉換成以下格式
+[描述目標格式或貼上目標 JSON 範例]
+請使用 return $input.all().map() 處理並返回結果。

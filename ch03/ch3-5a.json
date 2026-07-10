@@ -1,0 +1,132 @@
+{
+  "name": "ch3-5a",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-summary",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "75a9bd34-15c4-49c8-ba58-e3bb239ef3d9",
+      "name": "Webhook",
+      "webhookId": "b87cd5ad-99ae-43d3-bb23-66116321ee47"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $json.body.article }}"
+            },
+            {
+              "role": "system",
+              "content": "你是一位專業的文章摘要助手。請將使用者提供的文章內容，摘要成 3-5 個重點，每個重點不超過 50 字。請使用繁體中文回應，並以條列方式呈現。"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "b22f9386-3297-41d8-be33-fbc577067199",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "oNIFwXwzzn5QyzNJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "049bc1d4-4963-40b4-8ee5-592d27c908bd",
+              "name": "success",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "620a2ffe-88cd-481a-8b04-ece462d3e544",
+              "name": "summary",
+              "value": "={{ $json.output[0].content[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "0c74fcf6-7785-4aa9-8eb9-f618a30f04eb",
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        0
+      ],
+      "id": "5d3687d5-a558-41bc-83c8-4a0fd1915da4",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ccaa638f-6947-4b71-b64b-2359d89c81a2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "MpYfhp0TmLpq9IpN",
+  "tags": []
+}

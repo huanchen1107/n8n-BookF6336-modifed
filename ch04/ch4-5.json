@@ -1,0 +1,157 @@
+{
+  "name": "ch4-5",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        848,
+        368
+      ],
+      "id": "163d6732-48eb-4678-b7da-775b22387f30",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\customer_service.xlsx",
+        "sheetNameOptions": "Sheet1"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        368
+      ],
+      "id": "c996051d-db3c-4617-8fc9-95c4506e1820",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\customer_service.xlsx",
+        "operation": "updateRow",
+        "sheetNameOptions": "Sheet1",
+        "rowNumber": "={{ $('Read rows from Excel').item.json._rowNumber }}",
+        "updateMode": "fields",
+        "updateFields": {
+          "fields": [
+            {
+              "fieldName": "AI回答",
+              "fieldValue": "={{ $json.text }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        368
+      ],
+      "id": "a272bd87-6128-459c-946f-85af8a7f55a6",
+      "name": "Update row in Excel"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        560
+      ],
+      "id": "a34818cf-d44d-4181-b9f9-6681f32fc2d4",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BE03B8XedTGZrDN2",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['客戶問題'] }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "你是一位專業的客服人員，請用繁體中文回答客戶問題，回答要簡潔有禮貌。"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1184,
+        368
+      ],
+      "id": "55e2e112-3f7c-4a55-80aa-17d9ff5cacb3",
+      "name": "Basic LLM Chain"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Update row in Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ad3c9c6b-b56f-42c0-a6a9-f5a8a670d398",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "iZbhxFIamgtSWx7s",
+  "tags": []
+}

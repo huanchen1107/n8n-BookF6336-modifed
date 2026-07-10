@@ -1,0 +1,110 @@
+{
+  "name": "ch3-5",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-summary",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "198350ac-fd96-4614-8a22-e493405db1ca",
+      "name": "Webhook",
+      "webhookId": "c474a0c8-6f85-429a-9184-75c4e0279436"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $json.body.article }}"
+            },
+            {
+              "role": "system",
+              "content": "你是一位專業的文章摘要助手。請將使用者提供的文章內容，摘要成 3-5 個重點，每個重點不超過 50 字。請使用繁體中文回應，並以條列方式呈現。"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "cde8cdcd-b898-4fe9-a315-89de5cf40f12",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "oNIFwXwzzn5QyzNJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 取得 AI 回應內容\nconst aiResponse = $input.first().json;\n// 從 output[0].content 陣列中提取文字\nconst textContent = aiResponse.output[0].content[0].text;\n// 格式化回傳為 JSON\nreturn [{\n  json: {\n    success: true,\n    summary: textContent,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        0
+      ],
+      "id": "b94159ad-cb9d-4296-b4d2-90ad1ff274a8",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4a1cecf4-9298-4fcb-8cb0-e449a544afa5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "RIOB3gRMoCDwSVeW",
+  "tags": []
+}

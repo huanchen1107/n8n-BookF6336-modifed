@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>商品訂購</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 500px; margin: 60px auto; background: #f0f4f8; }
+  .card { background: white; padding: 32px; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+  h2 { color: #1E4B8E; margin-bottom: 24px; }
+  label { display: block; font-weight: bold; margin: 12px 0 4px; color: #333; }
+  input, select { width: 100%; padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
+  button { width: 100%; margin-top: 20px; padding: 12px; background: #1E4B8E; color: white; border: none; border-radius: 5px; font-size: 15px; font-weight: bold; cursor: pointer; }
+  button:hover { background: #2D6A9F; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>🛒 商品訂購</h2>
+  <form action="http://localhost:5678/webhook/order-submit" method="POST">
+    <label>客戶姓名</label>
+    <input name="customerName" required placeholder="王小明">
+    <label>客戶 Email</label>
+    <input name="customerEmail" type="email" required placeholder="email@example.com">
+    <label>商品</label>
+    <select name="productId" required>
+      <option value="">-- 請選擇商品 --</option>
+      <option value="P001|藍牙耳機|1200">藍牙耳機 - NT$1,200</option>
+      <option value="P002|無線滑鼠|650">無線滑鼠 - NT$650</option>
+      <option value="P003|機械鍵盤|2800">機械鍵盤 - NT$2,800</option>
+      <option value="P004|USB集線器|380">USB集線器 - NT$380</option>
+      <option value="P005|行動電源|890">行動電源 - NT$890</option>
+    </select>
+    <label>數量</label>
+    <input name="quantity" type="number" min="1" max="99" value="1" required>
+    <label>出貨日期</label>
+    <input name="shipDate" type="date" required>
+    <button type="submit">送出訂單</button>
+  </form>
+</div>
+</body>
+</html>

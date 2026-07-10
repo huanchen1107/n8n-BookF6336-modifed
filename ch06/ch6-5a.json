@@ -1,0 +1,139 @@
+{
+  "name": "ch6-5a",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        96
+      ],
+      "id": "36932e80-7e7e-416f-86d1-9629d0b26edb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:\\n8n-data\\ch06\\customer_service_result.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        -352,
+        96
+      ],
+      "id": "401cd1d8-e4de-4206-904e-42a2d7ea4fec",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "16a7cb08-e159-4cdb-a1ab-e8c830ad799e",
+              "leftValue": "{{ $binary.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -192,
+        96
+      ],
+      "id": "95caa8f2-1a7d-4312-bbf7-6c3d94bae201",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hueyanchen2020@gmail.com",
+        "toEmail": "test@example.com",
+        "subject": "=客服分類結果 - {{ $now.format('yyyy-MM-dd') }}",
+        "html": "=<p>您好，</p>\n<p>附件為 <b>{{ $now.format('yyyy-MM-dd') }}</b> 客服自動分類結果，請查閱處理。</p>\n<br>\n<p>此郵件由系統自動發送，請勿直接回覆。</p>\n",
+        "options": {
+          "attachments": "data"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        80
+      ],
+      "id": "0e7a54e1-c1f6-4ead-a8d7-72d2bd876228",
+      "name": "Send an Email",
+      "webhookId": "dbb4afe8-6710-4137-a321-f5d2ad648a90",
+      "credentials": {
+        "smtp": {
+          "id": "UM06ssDnTxzoirMQ",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e7f11546-554b-48ad-ad0d-cfe9276a382a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "TeZZbHAGJKwjF14W",
+  "tags": []
+}

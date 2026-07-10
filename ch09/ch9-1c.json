@@ -1,0 +1,152 @@
+{
+  "name": "ch9-1c",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "C:\\n8n-data\\ch09\\csv_input",
+        "events": [
+          "add"
+        ],
+        "options": {
+          "ignored": "!(*.csv)"
+        }
+      },
+      "id": "baead0eb-7eb7-43db-bdd3-5bff97e99adf",
+      "name": "Local File Trigger (CSV)",
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=python C:\\n8n-data\\ch09\\csv_to_excel.py \"{{ $json.path }}\" \"C:\\\\n8n-data\\\\ch09\\\\excel_output\\\\{{ $json.name.replace('.csv', '.xlsx') }}\""
+      },
+      "id": "b4a4c1a0-82fd-4eca-bec4-7f0f9e92d0cb",
+      "name": "CSV to Excel",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=python C:\\n8n-data\\ch09\\validate_data.py \"C:\\\\n8n-data\\\\ch09\\\\excel_output\\\\{{ $('Edit Fields').item.json.name.replace('.csv', '.xlsx') }}\""
+      },
+      "id": "3c39eba1-7095-4712-8ae3-82016563d5eb",
+      "name": "Data Validation",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        464,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=cmd /c start excel \"C:\\\\n8n-data\\\\ch09\\\\excel_output\\\\{{ $('Edit Fields').item.json.name.replace('.csv', '.xlsx') }}\""
+      },
+      "id": "08883452-aae9-455b-aebc-f38061dfcb70",
+      "name": "Open Excel Application",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1660c789-11b9-48ff-a9b3-d0a0e5ae5083",
+              "name": "path",
+              "value": "={{ $json.path }}",
+              "type": "string"
+            },
+            {
+              "id": "fe2e7566-ae0b-4b00-ac06-e163d8423d56",
+              "name": "name",
+              "value": "={{ $json.path.split(/[\\\\/]/).last() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "93978c5a-d609-45b4-92c7-6c91619c551b",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Local File Trigger (CSV)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CSV to Excel": {
+      "main": [
+        [
+          {
+            "node": "Data Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Validation": {
+      "main": [
+        [
+          {
+            "node": "Open Excel Application",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "CSV to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "48f8d463-6a6d-4132-8112-c3982859b308",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "M1w2cbJQIKsF3Gyy",
+  "tags": []
+}

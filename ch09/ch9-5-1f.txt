@@ -1,0 +1,12 @@
+日期時間處理的提示詞範本：ch9-5-1f.txt
+請寫一個完整的Python程式：
+輸入輸出：透過命令列參數接收，使用 sys.argv 取得參數，sys.argv[1] 為來源Excel檔案路徑，sys.argv[2] 為輸出Excel檔案路徑
+日期欄位：［欄位名］
+處理需求：
+- 解析日期：pd.to_datetime(df['date'], format='%Y-%m-%d')
+- 提取：年（year）、月（month）、週（week）、星期（dayofweek）
+- 計算間隔：(df['end_date'] - df['start_date']).dt.days
+- 按時間分組統計：df.groupby(pd.Grouper(key='date', freq='M'))
+輸出：將處理後的結果存為Excel檔案
+使用範例：
+python datetime_proc.py C:\data\orders.xlsx C:\data\date_result.xlsx

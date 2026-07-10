@@ -1,0 +1,289 @@
+{
+  "name": "ch5-4-2a",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        96
+      ],
+      "id": "21654ec9-e8d7-41c5-96e6-c45ff1f01bb9",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch05\\ch5-4-2\\bubble-tea-orders.xlsx",
+        "sheetNameOptions": "訂單資料",
+        "includeRowNumber": false
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6946c18d-0810-4650-8c92-b5cc641ff407",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6e64ad37-6971-4a1f-b2d3-406f4743b1f9",
+              "name": "序號",
+              "value": "={{ $itemIndex + 1 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "6704e329-fdd5-42fa-896a-d1d5167d80cd",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "小計"
+            },
+            {
+              "field": "姓名"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "c652c98e-97ec-4966-a1d8-d036d72e2bf7",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch05\\ch5-4-2\\手搖飲店基本資料.xlsx",
+        "sheetNameOptions": "店家資料",
+        "includeRowNumber": false
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        0,
+        208
+      ],
+      "id": "d58d864e-dc62-4bef-9372-15b9dbaa3e69",
+      "name": "Read rows from Excel1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ec01fbe-e74d-44c5-8dd7-6319e81ff164",
+              "name": "合計金額",
+              "value": "={{ $json['sum_小計'] }}",
+              "type": "number"
+            },
+            {
+              "id": "96aedf58-a974-4beb-bc35-97e0db5a140d",
+              "name": "訂單筆數",
+              "value": "={{ $json['count_姓名'] }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        0
+      ],
+      "id": "7c30f515-585d-4f30-afa8-65bf6a90b15c",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        192,
+        208
+      ],
+      "id": "4508d0a8-3bd9-4618-977d-af940444842b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "templatePath": "C:\\n8n-data\\ch05\\ch5-4-2\\訂貨確認報表範本.xlsx",
+        "outputPath": "=C:\\n8n-data\\ch05\\ch5-4-2\\訂貨確認報表.xlsx",
+        "dataEntries": {
+          "entries": [
+            {
+              "entryType": "tableData",
+              "startCell": "A4",
+              "tableData": "={{ [{\n  \"店家名稱\": $json['店家名稱'], \n  \"店家編號\": $json['店家編號'],\n  \"地址\": $json['地址'],\n  \"聯絡電話\": $json['聯絡電話'],\n  \"營業時間\": $json['營業時間'],\n  \"最低訂購金額\": $json['最低訂購金額'],\n  \"配送費\": $json['配送費'],\n  \"配送說明\": $json['配送說明'],\n  \"負責人\": $json['負責人'],\n  \"Email\": $json['Email']\n}] }}",
+              "writeHeaders": false
+            },
+            {
+              "cell": "B5",
+              "value": "={{ $now.format('yyyy/MM/dd') }}"
+            },
+            {
+              "cell": "D5",
+              "value": "n8n 自動生成"
+            },
+            {
+              "cell": "F5",
+              "value": "={{ $('Edit Fields1').first().json['訂單筆數'] }}"
+            },
+            {
+              "cell": "H5",
+              "value": "={{ $('Edit Fields1').first().json['合計金額'] }}"
+            },
+            {
+              "entryType": "tableData",
+              "startCell": "A8",
+              "tableData": "={{ $('Edit Fields').all().map(i => ({\n   \"序號\": i.json['序號'],\n   \"姓名\": i.json['姓名'], \n   \"飲料\": i.json['飲料'],\n   \"甜度\": i.json['甜度'],\n   \"冰塊\": i.json['冰塊'], \n   \"數量\": i.json['數量'], \n   \"單價\": i.json['單價'],\n   \"小計\": i.json['小計'],\n   \"訂購時間\": i.json['訂購時間'] })\n) }}",
+              "writeHeaders": false
+            },
+            {
+              "cell": "H18",
+              "value": "={{ $('Edit Fields1').first().json['合計金額'] }}"
+            }
+          ]
+        },
+        "options": {
+          "ifFileExists": "overwrite",
+          "worksheetName": "訂貨確認報表"
+        }
+      },
+      "type": "n8n-nodes-excel-templater.excelTemplater",
+      "typeVersion": 1,
+      "position": [
+        352,
+        208
+      ],
+      "id": "2d737eac-92ac-4217-a65e-570ff4e2221e",
+      "name": "Excel Templater"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read rows from Excel1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Excel Templater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4997f6f7-24ca-4c70-96d9-5d33243e9e67",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "sdCZNnjfN5P9wR1m",
+  "tags": []
+}

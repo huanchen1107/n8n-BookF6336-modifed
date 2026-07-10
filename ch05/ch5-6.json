@@ -1,0 +1,280 @@
+{
+  "name": "ch5-6",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "invoice-upload",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "16ef6234-932a-4090-a6dd-a5dbf170b94b",
+      "name": "Webhook",
+      "webhookId": "ab720b7d-5d37-47e7-a9e1-29342e172e99"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!DOCTYPE html>\n<html lang=\"zh-TW\">\n<head>\n<meta charset=\"UTF-8\">\n<title>發票上傳 OCR</title>\n<style>\n  body { font-family: Arial, sans-serif; max-width: 500px; margin: 60px auto; background: #e8f8f8; }\n  .card { background: white; padding: 32px; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }\n  h2 { color: #0E6B6B; margin-bottom: 8px; }\n  p  { color: #666; font-size: 13px; margin-bottom: 20px; }\n  label { display: block; font-weight: bold; color: #333; margin-bottom: 6px; }\n  input[type=file] { width: 100%; padding: 10px; border: 2px dashed #1A9696;\n    border-radius: 6px; box-sizing: border-box; background: #EBF9F9;\n    font-size: 14px; cursor: pointer; }\n  input[type=text] { width: 100%; padding: 9px 12px; border: 1px solid #ccc;\n    border-radius: 5px; box-sizing: border-box; font-size: 14px; margin-bottom: 14px; }\n  button { width: 100%; margin-top: 18px; padding: 12px;\n    background: #0E6B6B; color: white; border: none;\n    border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; }\n  button:hover { background: #1A9696; }\n  .tip { font-size: 12px; color: #888; margin-top: 6px; }\n</style>\n</head>\n<body>\n<div class=\"card\">\n  <h2>🧾 發票 OCR 上傳</h2>\n  <p>上傳發票圖片，系統將自動使用 AI 識別發票內容並存入記錄</p>\n  <form action=\"/webhook-test/invoice-ocr\" method=\"POST\" enctype=\"multipart/form-data\">\n    <label>買方名稱（選填）</label>\n    <input type=\"text\" name=\"buyerName\" placeholder=\"王小明\">\n    <label>發票圖片</label>\n    <input type=\"file\" name=\"invoiceImage\" accept=\"image/*\" required>\n    <p class=\"tip\">支援 JPG、PNG、WEBP 格式，建議解析度 800px 以上</p>\n    <button type=\"submit\">📤 上傳並識別</button>\n  </form>\n</div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        176,
+        0
+      ],
+      "id": "8de4fba7-3807-4901-a2b4-a393bde640d5",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "invoice-ocr",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        176
+      ],
+      "id": "ba18cf87-becf-4ec6-8227-f83535bcbe16",
+      "name": "Webhook1",
+      "webhookId": "bf6d2ee2-cb34-4d99-ba7b-8bd61e9f6ba9"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "請識別這張發票圖片，並嚴格以 JSON 格式回傳以下欄位：\n{\n  \"invoice_number\": \"發票號碼\",\n  \"date\": \"YYYY-MM-DD\",\n  \"seller_name\": \"賣方名稱\",\n  \"seller_tax_id\": \"賣方統一編號\",\n  \"amount\": 數字,\n  \"buyer_name\": \"從前一個節點取得的買方名稱\"\n}",
+        "inputType": "binary",
+        "binaryPropertyName": "invoiceImage",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        176
+      ],
+      "id": "41146bcb-4384-4680-a328-6ef6a887856b",
+      "name": "Analyze an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3fTloRjhqENCKNlp",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dce50b68-11bb-48c5-b2fc-85275b0f0eaf",
+              "name": "記錄編號",
+              "value": "={{ 'INV-' + String($runIndex + 10).padStart(3, '0') }}",
+              "type": "string"
+            },
+            {
+              "id": "baf7b3b3-5303-4e9d-9988-ed9197a08be8",
+              "name": "上傳時間",
+              "value": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}",
+              "type": "string"
+            },
+            {
+              "id": "09f89d26-2037-4ff2-b65a-13bdd513139b",
+              "name": "發票號碼",
+              "value": "={{ $json.invoice_number }}",
+              "type": "string"
+            },
+            {
+              "id": "db553fb8-64f6-4785-b838-12d586483f92",
+              "name": "發票日期",
+              "value": "={{ $json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "bce04982-fdca-4de1-9bfb-1b52c1bc45b5",
+              "name": "賣方名稱",
+              "value": "={{ $json.seller_name }}",
+              "type": "string"
+            },
+            {
+              "id": "5c1a6fe1-3515-475c-a819-e2628e72f600",
+              "name": "賣方統一編號",
+              "value": "={{ $json.seller_tax_id }}",
+              "type": "string"
+            },
+            {
+              "id": "11148bb3-cf58-441b-81af-29377668ef85",
+              "name": "買方名稱",
+              "value": "={{ $('Webhook1').item.json.body.buyerName }}",
+              "type": "string"
+            },
+            {
+              "id": "6b9b2b45-6e1d-4a85-97d4-6c2c476c997c",
+              "name": "金額",
+              "value": "={{ $json.amount }}",
+              "type": "number"
+            },
+            {
+              "id": "52f46ef6-13e8-4da0-a231-a316e9ca199e",
+              "name": "備註",
+              "value": "自動LLM-OCR識別",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        176
+      ],
+      "id": "a8b32247-5928-4e8b-a304-819d7770efcb",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.content.parts[0].text;\n\n// 清除 markdown 符號（如果有的話）\nconst clean = text.replace(/```json\\n?|\\n?```/g, '').trim();\n\n// 轉成 JSON 物件\nconst parsed = JSON.parse(clean);\n\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        176
+      ],
+      "id": "e70c201c-2918-4501-ae12-c6ddd051075f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch05\\ch5-6\\invoice_ocr.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "發票記錄",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        656,
+        176
+      ],
+      "id": "62aab5cd-baeb-448f-a11a-a9ee0059fcde",
+      "name": "Add row to Excel"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html>\n<html lang=\"zh-TW\">\n<head><meta charset=\"UTF-8\"><title>OCR 完成</title>\n<style>\n  body{font-family:Arial,sans-serif;max-width:520px;margin:60px auto;background:#e8f8f8;}\n  .card{background:white;padding:32px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.12);}\n  h2{color:#0E6B6B;} table{width:100%;border-collapse:collapse;margin:16px 0;}\n  td,th{padding:9px 12px;border:1px solid #ddd;font-size:14px;}\n  th{background:#0E6B6B;color:white;text-align:left;}\n  tr:nth-child(even){background:#EBF9F9;}\n  .ok{color:green;font-weight:bold;font-size:16px;}\n  a{display:block;margin-top:18px;text-align:center;color:#0E6B6B;}\n</style>\n</head>\n<body>\n<div class=\"card\">\n  <h2>✅ LLM-OCR 識別完成</h2>\n  <p class=\"ok\">已成功識別並存入記錄！</p>\n  <table>\n    <tr><th>欄位</th><th>識別結果</th></tr>\n    <tr><td>記錄編號</td><td>{{ $json.data['記錄編號'] }}</td></tr>\n    <tr><td>發票號碼</td><td>{{ $json.data['發票號碼'] }}</td></tr>\n    <tr><td>發票日期</td><td>{{ $json.data['發票日期'] }}</td></tr>\n    <tr><td>賣方名稱</td><td>{{ $json.data['賣方名稱'] }}</td></tr>\n    <tr><td>買方名稱</td><td>{{ $json.data['買方名稱'] }}</td></tr>\n    <tr><td>金額</td><td>NT$ {{ $json.data['金額'] }}</td></tr>\n  </table>\n  <a href=\"/webhook-test/invoice-upload\">← 再上傳一張</a>\n</div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        816,
+        176
+      ],
+      "id": "06dbe72c-4bbe-4d4b-a66b-8db73a92549a",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Analyze an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze an image": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Add row to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add row to Excel": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fb2ed425-43da-406d-9213-f457522a6cea",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "gtP78tsBs5ITYEqh",
+  "tags": []
+}

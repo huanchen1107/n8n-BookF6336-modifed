@@ -1,0 +1,103 @@
+{
+  "name": "ch9-1",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e7d82bfb-6baf-4ee0-94a9-8c5b9c1bc511",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "python --version"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "4e29bd96-addc-4ab2-b556-1f131ae174e4",
+      "name": "Execute Command (version)"
+    },
+    {
+      "parameters": {
+        "command": "where python"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        352,
+        0
+      ],
+      "id": "39d6529a-c66b-4811-b3f7-b2a422ccfccd",
+      "name": "Execute Command (where)"
+    },
+    {
+      "parameters": {
+        "command": "python -c \"import openpyxl; print('OK')\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        528,
+        0
+      ],
+      "id": "5c4c89f1-0d55-4b40-ba01-886af0f19a0a",
+      "name": "Execute Command (package exists)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Execute Command (version)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command (version)": {
+      "main": [
+        [
+          {
+            "node": "Execute Command (where)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command (where)": {
+      "main": [
+        [
+          {
+            "node": "Execute Command (package exists)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0b305856-c9d5-43b8-b7b5-22ae907941c3",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "JtZvb03mortfHFuD",
+  "tags": []
+}

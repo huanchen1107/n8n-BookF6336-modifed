@@ -1,0 +1,401 @@
+{
+  "name": "ch4-2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "employee-submit",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        352
+      ],
+      "id": "53e280ce-310f-44b8-be0d-102794248dd3",
+      "name": "Webhook",
+      "webhookId": "e84e653d-d729-44e9-8527-509834185fcd"
+    },
+    {
+      "parameters": {
+        "filePath": "C:/n8n-data/ch04/employees.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "employees",
+        "rowData": "={{ JSON.stringify($json) }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        208
+      ],
+      "id": "19f9c854-ef61-4f72-88db-93253ad3085f",
+      "name": "Add row to Excel"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\employees.xlsx",
+        "operation": "filterRows",
+        "sheetNameOptions": "employees",
+        "filterConditions": {
+          "conditions": [
+            {
+              "field": "員工編號",
+              "value": "={{ $json['員工編號'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        928,
+        432
+      ],
+      "id": "13f7bf40-042f-4ed3-94a3-4bb0bdfe2e17",
+      "name": "Filter rows in Excel"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ $json.body }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        352
+      ],
+      "id": "1bac4a24-5fa6-48a3-af03-b16d8c995cae",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\employees.xlsx",
+        "operation": "updateRow",
+        "sheetNameOptions": "employees",
+        "rowNumber": "={{ $json._rowNumber }}",
+        "updatedData": "={{ $('If').item.json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        304
+      ],
+      "id": "b78620ef-1431-4371-ac64-7f1c458c0e42",
+      "name": "Update row in Excel"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\employees.xlsx",
+        "operation": "deleteRow",
+        "sheetNameOptions": "employees",
+        "rowNumber": "={{ $json._rowNumber }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        480
+      ],
+      "id": "39a52aaf-ccba-4595-84bf-33f5c4de107b",
+      "name": "Delete row from Excel"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "_rowNumber",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        480
+      ],
+      "id": "57ba6841-cdf4-4457-adfd-cedc64708002",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fc42deed-f14d-4bbf-9e27-7a85248df4cd",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "create",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        752,
+        352
+      ],
+      "id": "fe9f38f6-a149-4fe5-b91f-302fb7efa0d9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7272abb0-f80b-4b29-8345-a706501b2fe3",
+                    "leftValue": "={{ $('If').item.json.action }}",
+                    "rightValue": "read",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bc206d4d-7a96-47b2-aabc-5071dcb5e187",
+                    "leftValue": "={{ $('If').item.json.action }}",
+                    "rightValue": "update",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0d0b6186-853c-4cf0-9a1b-646f839998ae",
+                    "leftValue": "={{ $('If').item.json.action }}",
+                    "rightValue": "delete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1088,
+        416
+      ],
+      "id": "a4c4add4-9f46-43c9-b151-c0522e307c27",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e5ab048-4c6e-486b-af6d-39276d4c0c2b",
+              "name": "員工編號",
+              "value": "={{ $json.員工編號 }}",
+              "type": "string"
+            },
+            {
+              "id": "17effe6f-8408-4b2d-b413-c10b6cafa6e5",
+              "name": "姓名",
+              "value": "={{ $json.姓名 }}",
+              "type": "string"
+            },
+            {
+              "id": "ab6a57ed-f456-4223-ac9c-91d24b472f22",
+              "name": "部門",
+              "value": "={{ $json.部門 }}",
+              "type": "string"
+            },
+            {
+              "id": "5c52e16b-5c50-45ce-a6ff-81fe6e6d096f",
+              "name": "薪資",
+              "value": "={{ $json.薪資 }}",
+              "type": "number"
+            },
+            {
+              "id": "c97f59c3-3a89-4073-815b-0834a6fc0f39",
+              "name": "狀態",
+              "value": "={{ $json.狀態 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        208
+      ],
+      "id": "d2c6a074-5317-43dc-994f-7ce18d2d4c6f",
+      "name": "Edit Fields1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Delete row from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter rows in Excel": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Filter rows in Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Update row in Excel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Add row to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8ff52c38-ee47-4b68-a7a2-a4ce9bcba3f1",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "A4OKtPWb4Zu77oY0",
+  "tags": []
+}

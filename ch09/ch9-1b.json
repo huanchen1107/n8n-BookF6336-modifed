@@ -1,0 +1,122 @@
+{
+  "name": "ch9-1b",
+  "nodes": [
+    {
+      "parameters": {
+        "command": "=python C:\\n8n-data\\ch09\\data_cleaner.py \"{{ $json.path }}\" \"C:\\n8n-data\\ch09\\output\\cleaned_{{ $json.name }}\""
+      },
+      "id": "6d1ea268-9f8a-4c15-8c5e-9690918fe5be",
+      "name": "Execute Command (Data Cleaning)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=python C:\\n8n-data\\ch09\\data_analyzer.py \"C:\\n8n-data\\ch09\\output\\cleaned_{{ $('Edit Fields').item.json.name }}\""
+      },
+      "id": "39737e5c-6473-42db-8661-2623521a7dd9",
+      "name": "Execute Command (Analysis)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        496,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1660c789-11b9-48ff-a9b3-d0a0e5ae5083",
+              "name": "path",
+              "value": "={{ $json.file.path }}",
+              "type": "string"
+            },
+            {
+              "id": "fe2e7566-ae0b-4b00-ac06-e163d8423d56",
+              "name": "name",
+              "value": "={{ $json.file.full_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "ff97533b-018e-42e2-a83e-025928847223",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "watchPath": "C:\\n8n-data\\ch09\\input",
+        "advancedSettings": {}
+      },
+      "type": "n8n-nodes-excel-watcher.excelWatcher",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4b5c26ff-b00a-4f47-8c47-92feea89cf81",
+      "name": "Excel Watcher"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Command (Data Cleaning)": {
+      "main": [
+        [
+          {
+            "node": "Execute Command (Analysis)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute Command (Data Cleaning)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel Watcher": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7e83df0c-86b8-4a92-bbf4-13954f5d8d24",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "bIS3kczg1p3thC3M",
+  "tags": []
+}

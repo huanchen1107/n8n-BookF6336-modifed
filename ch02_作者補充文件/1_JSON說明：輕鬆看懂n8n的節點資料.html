@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON 說明：輕鬆看懂 n8n 的節點資料</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --dark-bg:    #0D1117;
+  --card-bg:    #161B22;
+  --code-bg:    #1A2233;
+  --border:     #30363D;
+
+  --yellow:  #F0C040;
+  --blue:    #58A6FF;
+  --green:   #3FB950;
+  --teal:    #2EBF9A;
+  --purple:  #AFA9EC;
+  --orange:  #F0883E;
+  --cyan:    #79C0FF;
+  --red:     #FF7B72;
+  --white:   #E6EDF3;
+  --muted:   #8B949E;
+}
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--dark-bg);
+  color: var(--white);
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* ═══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+.hero {
+  background: var(--dark-bg);
+  padding: 32px 40px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.hero h1 {
+  font-size: 42px;
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--yellow);
+}
+.hero p {
+  font-size: 15px;
+  color: var(--muted);
+  max-width: 720px;
+}
+.hero p strong { color: var(--white); font-weight: 500; }
+
+/* ═══════════════════════════════════════
+   MAIN GRID (3 columns)
+══════════════════════════════════════ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 210px 1fr 210px;
+  gap: 0;
+  padding: 20px 20px;
+  min-height: 560px;
+}
+
+/* LEFT panel */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-right: 16px;
+}
+
+.panel-card {
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.panel-card.blue-header  { border-color: #1F6FEB; }
+.panel-card.green-header { border-color: #238636; }
+
+.card-title {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 7px 0;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+.blue-title  { background: #1F6FEB; color: #fff; }
+.green-title { background: #238636; color: #fff; }
+.purple-title{ background: #6E40C9; color: #fff; }
+.indigo-title{ background: #3B4BA8; color: #fff; }
+
+.what-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.icon-box {
+  width: 56px; height: 56px;
+  border-radius: 10px;
+  border: 2px solid #1F6FEB;
+  background: #0D1F3C;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: #58A6FF;
+}
+
+.what-text {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+  text-align: center;
+}
+.what-text strong { color: var(--white); }
+
+.feature-list { list-style: none; }
+.feature-list li {
+  font-size: 12.5px;
+  color: var(--muted);
+  padding: 4px 0;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.feature-list li::before {
+  content: '✓';
+  color: #3FB950;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ═══════════════════════════════════════
+   CENTER: Code block
+══════════════════════════════════════ */
+.center-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.center-title {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.center-title strong { color: var(--blue); }
+
+.code-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.code-block {
+  background: var(--code-bg);
+  border-radius: 8px;
+  padding: 16px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.95;
+  flex: 1;
+  position: relative;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* Syntax colors */
+.jk  { color: #F0C040; }   /* key */
+.js  { color: #3FB950; }   /* string value */
+.jn  { color: #79C0FF; }   /* number */
+.jb  { color: #AFA9EC; }   /* boolean */
+.jl  { color: #8B949E; }   /* null */
+.jp  { color: #E6EDF3; }   /* punctuation / default */
+
+/* Highlight boxes around regions */
+.hl-obj    { display:inline; background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.3);  border-radius:4px; padding: 0 2px; }
+.hl-str    { display:inline; background: rgba(63,185,80,0.08);  border: 1px solid rgba(63,185,80,0.3);   border-radius:4px; padding: 0 2px; }
+.hl-arr    { display:inline; background: rgba(240,136,62,0.08); border: 1px solid rgba(240,136,62,0.3);  border-radius:4px; padding: 0 2px; }
+.hl-nested { display:inline; background: rgba(46,191,154,0.08); border: 1px solid rgba(46,191,154,0.3);  border-radius:4px; padding: 0 2px; }
+.hl-bool   { display:inline; background: rgba(175,169,236,0.1); border: 1px solid rgba(175,169,236,0.3); border-radius:4px; padding: 0 2px; }
+
+/* Annotations on the right */
+.annotations {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding: 4px 0 0 0;
+}
+
+.ann-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  min-width: 180px;
+  flex: 1;
+}
+.ann-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.ann-title { font-weight: 700; font-size: 13px; display: block; }
+.ann-desc  { color: var(--muted); font-size: 11.5px; }
+
+/* ═══════════════════════════════════════
+   RIGHT panel – type reference
+══════════════════════════════════════ */
+.right-panel {
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.right-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.type-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid #21262D;
+  font-size: 12.5px;
+}
+.type-row:last-child { border-bottom: none; }
+
+.type-icon {
+  width: 38px; height: 28px;
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.type-info { flex: 1; }
+.type-name { font-weight: 700; font-size: 12.5px; color: var(--white); display: block; }
+.type-desc { font-size: 11px; color: var(--muted); }
+
+/* Icon styles */
+.ti-obj    { background:#0D1F3C; border:1.5px solid #58A6FF; color:#58A6FF; }
+.ti-str    { background:#0D2615; border:1.5px solid #3FB950; color:#3FB950; }
+.ti-num    { background:#1C1208; border:1.5px solid #F0883E; color:#F0883E; }
+.ti-bool   { background:#1A1230; border:1.5px solid #AFA9EC; color:#AFA9EC; font-size:9px; }
+.ti-arr    { background:#1C1208; border:1.5px solid #F0883E; color:#F0883E; }
+.ti-null   { background:#1A1A1A; border:1.5px solid #8B949E; color:#8B949E; }
+.ti-expr   { background:#1A0E20; border:1.5px solid #D2A8FF; color:#D2A8FF; font-size:9px; }
+
+/* ═══════════════════════════════════════
+   BOTTOM GRID (3 columns)
+══════════════════════════════════════ */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr 0.9fr;
+  gap: 16px;
+  padding: 0 20px 28px;
+}
+
+/* Syntax rules */
+.syntax-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.syntax-body {
+  padding: 14px 16px;
+}
+.syntax-list { list-style: none; }
+.syntax-list li {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 5px 0;
+  border-bottom: 1px solid #21262D;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.5;
+}
+.syntax-list li:last-child { border-bottom: none; }
+.syn-dot { color: #58A6FF; flex-shrink: 0; font-size: 14px; margin-top: -1px; }
+.syntax-list li code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: #21262D;
+  color: #F0C040;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.syntax-list li strong { color: var(--white); }
+
+/* How to read */
+.read-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.read-body { padding: 14px 16px; }
+
+.steps-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  text-align: center;
+}
+
+.step-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: #1F6FEB;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-box {
+  width: 100%;
+  border-radius: 6px;
+  padding: 6px 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  min-height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid;
+}
+.sb-gray   { background:#21262D; border-color:#444C56; color:#E6EDF3; }
+.sb-yellow { background:#271D00; border-color:#9E6A03; color:#F0C040; }
+.sb-green  { background:#0D2615; border-color:#238636; color:#3FB950; }
+.sb-muted  { background:#1C2128; border-color:#444C56; color:#8B949E; }
+.sb-blue   { background:#0D1F3C; border-color:#1F6FEB; color:#58A6FF; }
+
+.step-label {
+  font-size: 10.5px;
+  color: var(--muted);
+  line-height: 1.4;
+  max-width: 72px;
+}
+
+.step-arrow {
+  color: var(--muted);
+  font-size: 16px;
+  margin-top: 36px;
+  flex-shrink: 0;
+}
+
+/* Use cases */
+.usecase-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.usecase-body { padding: 14px 14px; }
+.usecase-list { list-style: none; }
+.usecase-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid #21262D;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.usecase-list li:last-child { border-bottom: none; }
+.uc-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.uc-blue   { background:#0D1F3C; }
+.uc-teal   { background:#0A2520; }
+.uc-orange { background:#1C1208; }
+.uc-purple { background:#1A1230; }
+.uc-green  { background:#0D2615; }
+
+/* Interactive annotation buttons */
+.ann-btn {
+  background: transparent;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  padding: 8px 10px;
+  transition: background 0.18s, border-color 0.18s, transform 0.12s;
+  color: inherit;
+  font-family: inherit;
+}
+.ann-btn:hover {
+  background: rgba(255,255,255,0.04);
+  transform: translateY(-1px);
+}
+.ann-btn.active-number  { background: rgba(121,192,255,0.10); border-color: rgba(121,192,255,0.5); }
+.ann-btn.active-string  { background: rgba(63,185,80,0.10);  border-color: rgba(63,185,80,0.5); }
+.ann-btn.active-boolean { background: rgba(175,169,236,0.10); border-color: rgba(175,169,236,0.5); }
+.ann-btn.active-array   { background: rgba(240,136,62,0.10);  border-color: rgba(240,136,62,0.5); }
+.ann-btn.active-nested  { background: rgba(46,191,154,0.10);  border-color: rgba(46,191,154,0.5); }
+
+/* Code line highlight */
+.code-line { display: block; border-radius: 4px; padding: 0 4px; margin: 0 -4px; transition: background 0.25s, box-shadow 0.25s; line-height: 1.95; }
+.code-line.hl-number  { background: rgba(121,192,255,0.18); box-shadow: inset 3px 0 0 #79C0FF; }
+.code-line.hl-string  { background: rgba(63,185,80,0.18);  box-shadow: inset 3px 0 0 #3FB950; }
+.code-line.hl-boolean { background: rgba(175,169,236,0.18); box-shadow: inset 3px 0 0 #AFA9EC; }
+.code-line.hl-array   { background: rgba(240,136,62,0.18);  box-shadow: inset 3px 0 0 #F0883E; }
+.code-line.hl-nested  { background: rgba(46,191,154,0.18);  box-shadow: inset 3px 0 0 #2EBF9A; }
+
+/* Pulse animation on newly highlighted line */
+@keyframes lineFlash {
+  0%   { opacity: 0.3; }
+  50%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+.code-line.hl-number,
+.code-line.hl-string,
+.code-line.hl-boolean,
+.code-line.hl-array,
+.code-line.hl-nested { animation: lineFlash 0.35s ease; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="hero">
+  <h1>JSON 說明：<em>輕鬆看懂 n8n 的節點資料</em></h1>
+  <p>JSON（JavaScript Object Notation）是 n8n <strong>節點之間傳遞資料的格式</strong>，每個節點執行後輸出的資料都是 JSON，可用 Schema、Table、JSON 三種方式檢視。</p>
+</div>
+
+<!-- ═══════════════ MAIN GRID ═══════════════ -->
+<div class="main-grid">
+
+  <!-- LEFT -->
+  <div class="left-panel">
+    <div class="panel-card blue-header">
+      <div class="card-title blue-title">什麼是 n8n 的 JSON？</div>
+      <div class="what-icon">
+        <div class="icon-box">{⚙}</div>
+      </div>
+      <p class="what-text">
+        n8n 節點執行後，輸出的資料以 <strong>JSON 格式</strong>儲存在 <strong>items[]</strong> 陣列中，每筆資料包在 <strong>{ "json": {...} }</strong> 結構裡傳給下一個節點。
+      </p>
+    </div>
+
+    <div class="panel-card green-header">
+      <div class="card-title green-title">三種檢視方式</div>
+      <ul class="feature-list">
+        <li><strong style="color:#fff">Schema</strong> — 欄位名稱與型別目錄</li>
+        <li><strong style="color:#fff">Table</strong> — 試算表格式，多筆比較</li>
+        <li><strong style="color:#fff">JSON</strong> — 完整原始結構，寫 expression 必看</li>
+        <li>用 <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#F0C040;">{{ $json["欄位"] }}</span> 引用資料</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center-panel">
+    <div class="center-title"><b class="card-title green-title">&nbsp;&nbsp;點選下方說明，可標示資料位置&nbsp;&nbsp;</b>&nbsp;
+      範例：一個 <strong> HTTP Request 節點</strong>的輸出資料<strong> items[0] </strong>（JSON 格式）
+    </div> ，
+    <div class="code-area">
+      <pre class="code-block" id="code-block"><span class="code-line" id="line-bracket-open"><span class="jp">[</span>  <span style="color:#444C56;font-size:11px;">← items 陣列，每筆資料一個元素</span></span><span class="code-line" id="line-obj-open">  <span class="jp">{</span></span><span class="code-line" id="line-json-key">    <span class="jk">"json"</span><span class="jp">: {</span>  <span style="color:#444C56;font-size:11px;">← 每筆資料包在 json 欄位裡</span></span><span class="code-line" id="line-id">      <span class="jk">"id"</span><span class="jp">:      </span><span class="hl-obj"><span class="jn">1001</span></span><span class="jp">,</span></span><span class="code-line" id="line-name">      <span class="jk">"name"</span><span class="jp">:    </span><span class="hl-str"><span class="js">"王小明"</span></span><span class="jp">,</span></span><span class="code-line" id="line-email">      <span class="jk">"email"</span><span class="jp">:   </span><span class="hl-str"><span class="js">"ming@example.com"</span></span><span class="jp">,</span></span><span class="code-line" id="line-active">      <span class="jk">"active"</span><span class="jp">:  </span><span class="hl-bool"><span class="jb">true</span></span><span class="jp">,</span></span><span class="code-line" id="line-scores">      <span class="jk">"scores"</span><span class="jp">:  </span><span class="hl-arr"><span class="jp">[</span> <span class="jn">85</span><span class="jp">,</span> <span class="jn">92</span><span class="jp">,</span> <span class="jn">78</span> <span class="jp">]</span></span><span class="jp">,</span></span><span class="code-line" id="line-address-open">      <span class="jk">"address"</span><span class="jp">: </span><span class="jp">{</span></span><span class="code-line" id="line-city">        <span class="jk">"city"</span><span class="jp">: </span><span class="js">"台北市"</span><span class="jp">,</span></span><span class="code-line" id="line-zip">        <span class="jk">"zip"</span><span class="jp">:  </span><span class="js">"10001"</span></span><span class="code-line" id="line-address-close">      <span class="jp">}</span></span><span class="code-line" id="line-json-close">    <span class="jp">}</span></span><span class="code-line" id="line-obj-close">  <span class="jp">}</span></span><span class="code-line" id="line-bracket-close"><span class="jp">]</span></span></pre>
+
+      <!-- Info panel shown on click -->
+      <div id="type-info-panel" style="display:none; margin-bottom:10px; padding:10px 14px; border-radius:8px; border:1.5px solid #30363D; background:#0D1117; font-size:12.5px; line-height:1.7; transition:all 0.2s;">
+        <div id="type-info-content"></div>
+      </div>
+
+      <div class="annotations">
+        <button class="ann-item ann-btn" data-type="number" onclick="highlightType('number')" title="點擊標示數字欄位">
+          <div class="ann-dot" style="background:#79C0FF;"></div>
+          <div>
+            <span class="ann-title" style="color:#79C0FF;">數字（Number）</span>
+            <span class="ann-desc">整數或浮點數，不需要引號。引用：<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#79C0FF;">{{ $json["id"] }}</span></span>
+          </div>
+        </button>
+        <button class="ann-item ann-btn" data-type="string" onclick="highlightType('string')" title="點擊標示字串欄位">
+          <div class="ann-dot" style="background:#3FB950;"></div>
+          <div>
+            <span class="ann-title" style="color:#3FB950;">字串（String）</span>
+            <span class="ann-desc">以雙引號 " " 包住的文字。引用：<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#3FB950;">{{ $json["name"] }}</span></span>
+          </div>
+        </button>
+        <button class="ann-item ann-btn" data-type="boolean" onclick="highlightType('boolean')" title="點擊標示布林值欄位">
+          <div class="ann-dot" style="background:#AFA9EC;"></div>
+          <div>
+            <span class="ann-title" style="color:#AFA9EC;">布林值（Boolean）</span>
+            <span class="ann-desc">只有 true 或 false，不需要引號。</span>
+          </div>
+        </button>
+        <button class="ann-item ann-btn" data-type="array" onclick="highlightType('array')" title="點擊標示陣列欄位">
+          <div class="ann-dot" style="background:#F0883E;"></div>
+          <div>
+            <span class="ann-title" style="color:#F0883E;">陣列（Array）</span>
+            <span class="ann-desc">以 [ ] 包含的有序清單，成員可以是任意型別。</span>
+          </div>
+        </button>
+        <button class="ann-item ann-btn" data-type="nested" onclick="highlightType('nested')" title="點擊標示巢狀物件欄位">
+          <div class="ann-dot" style="background:#2EBF9A;"></div>
+          <div>
+            <span class="ann-title" style="color:#2EBF9A;">巢狀物件（Nested Object）</span>
+            <span class="ann-desc">物件中可包含另一個物件，引用：<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#2EBF9A;">{{ $json["address"]["city"] }}</span></span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+    <div class="right-card">
+      <div class="card-title purple-title" style="margin:12px 12px 0;border-radius:6px;font-size:12.5px;padding:6px 0;">主要資料型別</div>
+
+      <div class="type-row">
+        <div class="type-icon ti-obj">{&nbsp;}</div>
+        <div class="type-info">
+          <span class="type-name">物件（Object）</span>
+          <span class="type-desc">鍵值對的集合</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon ti-str">" "</div>
+        <div class="type-info">
+          <span class="type-name">字串（String）</span>
+          <span class="type-desc">文字，需用雙引號</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon ti-num" style="font-size:12px;">123</div>
+        <div class="type-info">
+          <span class="type-name">數字（Number）</span>
+          <span class="type-desc">整數或浮點數</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon ti-bool" style="font-size:9px; line-height:1.2;">true<br>false</div>
+        <div class="type-info">
+          <span class="type-name">布林值（Boolean）</span>
+          <span class="type-desc">true 或 false</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon ti-arr">[ ]</div>
+        <div class="type-info">
+          <span class="type-name">陣列（Array）</span>
+          <span class="type-desc">有序的值集合</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon ti-null" style="font-size:10px;">null</div>
+        <div class="type-info">
+          <span class="type-name">空值（Null）</span>
+          <span class="type-desc">表示一個空值</span>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-icon ti-expr" style="font-size:9px;">{{}}</div>
+        <div class="type-info">
+          <span class="type-name" style="color:#D2A8FF;">表達式（Expression）</span>
+          <span class="type-desc">n8n 動態引用語法</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ BOTTOM GRID ═══════════════ -->
+<div class="bottom-grid">
+
+  <!-- Syntax rules -->
+  <div class="syntax-card">
+    <div class="card-title indigo-title" style="margin:12px 12px 0;border-radius:6px;font-size:12.5px;padding:7px 0;">JSON 語法規則（重點）</div>
+    <div class="syntax-body">
+      <ul class="syntax-list">
+        <li><span class="syn-dot">●</span> 鍵（Key）必須使用雙引號 <code>" "</code> 包起來。</li>
+        <li><span class="syn-dot">●</span> 字串值也必須使用雙引號 <code>" "</code>。</li>
+        <li><span class="syn-dot">●</span> 值可以是：字串、數字、布林值、陣列、物件或 null。</li>
+        <li><span class="syn-dot">●</span> 鍵值對之間使用<strong>逗號</strong>分隔。</li>
+        <li><span class="syn-dot">●</span> 最後一個鍵值對後面<strong>不能有逗號</strong>。</li>
+        <li><span class="syn-dot">●</span> n8n 資料是 <code>items[]</code>陣列，每筆資料有<code>"json": {}</code>欄位。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- How to read -->
+  <div class="read-card">
+    <div class="card-title indigo-title" style="margin:12px 12px 0;border-radius:6px;font-size:12.5px;padding:7px 0;">如何在 n8n 中讀取 JSON？</div>
+    <div class="read-body">
+      <div class="steps-row">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-box sb-gray">[ ]</div>
+          <div class="step-label">從 items 陣列開始</div>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-box sb-gray">{ }</div>
+          <div class="step-label">進入 json 物件</div>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-box sb-yellow" style="font-size:11px;">"name"</div>
+          <div class="step-label">找到想要的 Key</div>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-box sb-green" style="font-size:11px;">"王小明"</div>
+          <div class="step-label">冒號後面就是值</div>
+        </div>
+
+        <div class="step-arrow">→</div>
+
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-box sb-blue" style="font-size:9.5px;">{{ $json ["name"] }}</div>
+          <div class="step-label">用 expression 引用</div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:16px; padding:10px 12px; background:#161B22; border-radius:8px; border:1px solid #30363D;">
+        <div style="font-size:11.5px; color:#8B949E; margin-bottom:8px;">常用引用語法範例：</div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; line-height:2; color:#E6EDF3;">
+          <span style="color:#F0C040;">{{ $json["name"] }}</span><span style="color:#444C56;">  ← 取得字串欄位</span><br>
+          <span style="color:#F0C040;">{{ $json["id"] }}</span><span style="color:#444C56;">    ← 取得數字欄位</span><br>
+          <span style="color:#F0C040;">{{ $json["address"]["city"] }}</span><span style="color:#444C56;">  ← 巢狀物件</span><br>
+          <span style="color:#F0C040;">{{ $node["HTTP Request"].json["id"] }}</span><span style="color:#444C56;">  ← 跨節點引用</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Use cases -->
+  <div class="usecase-card">
+    <div class="card-title indigo-title" style="margin:12px 12px 0;border-radius:6px;font-size:12.5px;padding:7px 0;">應用場景</div>
+    <div class="usecase-body">
+      <ul class="usecase-list">
+        <li>
+          <div class="uc-icon uc-blue">⚡</div>
+          API 資料交換
+        </li>
+        <li>
+          <div class="uc-icon uc-teal">🔗</div>
+          節點間資料傳遞
+        </li>
+        <li>
+          <div class="uc-icon uc-orange">📋</div>
+          設定檔與組態檔
+        </li>
+        <li>
+          <div class="uc-icon uc-purple">🔄</div>
+          資料轉換與映射
+        </li>
+        <li>
+          <div class="uc-icon uc-green">🛠</div>
+          除錯與測試執行
+        </li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const typeConfig = {
+  number: {
+    lines: ['line-id'],
+    color: '#79C0FF',
+    cls: 'hl-number',
+    activeCls: 'active-number',
+    info: `<span style="color:#79C0FF;font-weight:700;font-size:13px;">🔢 數字（Number）</span><br>
+           整數或浮點數，<strong style="color:#E6EDF3;">不需要引號</strong>。在上方程式碼中，<code style="color:#79C0FF;background:#1A2233;padding:1px 5px;border-radius:3px;">"id": 1001</code> 就是一個數字值。<br>
+           <span style="color:#8B949E;">引用方式：</span> <code style="color:#F0C040;background:#1A2233;padding:1px 5px;border-radius:3px;">{{ $json["id"] }}</code>`
+  },
+  string: {
+    lines: ['line-name', 'line-email'],
+    color: '#3FB950',
+    cls: 'hl-string',
+    activeCls: 'active-string',
+    info: `<span style="color:#3FB950;font-weight:700;font-size:13px;">📝 字串（String）</span><br>
+           以<strong style="color:#E6EDF3;">雙引號 " " </strong>包住的文字內容。上方 <code style="color:#3FB950;background:#1A2233;padding:1px 5px;border-radius:3px;">"王小明"</code> 和 <code style="color:#3FB950;background:#1A2233;padding:1px 5px;border-radius:3px;">"ming@example.com"</code> 都是字串。<br>
+           <span style="color:#8B949E;">引用方式：</span> <code style="color:#F0C040;background:#1A2233;padding:1px 5px;border-radius:3px;">{{ $json["name"] }}</code>`
+  },
+  boolean: {
+    lines: ['line-active'],
+    color: '#AFA9EC',
+    cls: 'hl-boolean',
+    activeCls: 'active-boolean',
+    info: `<span style="color:#AFA9EC;font-weight:700;font-size:13px;">✅ 布林值（Boolean）</span><br>
+           只有 <code style="color:#AFA9EC;background:#1A2233;padding:1px 5px;border-radius:3px;">true</code> 或 <code style="color:#AFA9EC;background:#1A2233;padding:1px 5px;border-radius:3px;">false</code> 兩種值，<strong style="color:#E6EDF3;">不需要引號</strong>。上方 <code style="color:#AFA9EC;background:#1A2233;padding:1px 5px;border-radius:3px;">"active": true</code> 表示啟用狀態。<br>
+           <span style="color:#8B949E;">引用方式：</span> <code style="color:#F0C040;background:#1A2233;padding:1px 5px;border-radius:3px;">{{ $json["active"] }}</code>`
+  },
+  array: {
+    lines: ['line-scores'],
+    color: '#F0883E',
+    cls: 'hl-array',
+    activeCls: 'active-array',
+    info: `<span style="color:#F0883E;font-weight:700;font-size:13px;">📋 陣列（Array）</span><br>
+           以 <strong style="color:#E6EDF3;">[ ]</strong> 包住的有序清單，可包含任意型別。<code style="color:#F0883E;background:#1A2233;padding:1px 5px;border-radius:3px;">"scores": [85, 92, 78]</code> 是三個數字的陣列。<br>
+           <span style="color:#8B949E;">引用第一個元素：</span> <code style="color:#F0C040;background:#1A2233;padding:1px 5px;border-radius:3px;">{{ $json["scores"][0] }}</code> → 85`
+  },
+  nested: {
+    lines: ['line-address-open', 'line-city', 'line-zip', 'line-address-close'],
+    color: '#2EBF9A',
+    cls: 'hl-nested',
+    activeCls: 'active-nested',
+    info: `<span style="color:#2EBF9A;font-weight:700;font-size:13px;">🏠 巢狀物件（Nested Object）</span><br>
+           物件中可包含另一個物件。<code style="color:#2EBF9A;background:#1A2233;padding:1px 5px;border-radius:3px;">"address"</code> 的值本身又是一個 <strong style="color:#E6EDF3;">{ }</strong> 物件，裡面有 city 和 zip。<br>
+           <span style="color:#8B949E;">引用城市：</span> <code style="color:#F0C040;background:#1A2233;padding:1px 5px;border-radius:3px;">{{ $json["address"]["city"] }}</code> → 台北市`
+  }
+};
+
+let activeType = null;
+
+function clearAll() {
+  // Remove all highlight classes from lines
+  document.querySelectorAll('.code-line').forEach(el => {
+    el.className = 'code-line';
+  });
+  // Remove active state from buttons
+  document.querySelectorAll('.ann-btn').forEach(btn => {
+    btn.className = 'ann-item ann-btn';
+  });
+  // Hide info panel
+  document.getElementById('type-info-panel').style.display = 'none';
+}
+
+function highlightType(type) {
+  // Toggle off if same type clicked again
+  if (activeType === type) {
+    clearAll();
+    activeType = null;
+    return;
+  }
+  clearAll();
+  activeType = type;
+
+  const cfg = typeConfig[type];
+
+  // Highlight lines
+  cfg.lines.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      // Remove and re-add to retrigger animation
+      el.className = 'code-line';
+      void el.offsetWidth; // force reflow
+      el.classList.add(cfg.cls);
+    }
+  });
+
+  // Activate button
+  const btn = document.querySelector(`[data-type="${type}"]`);
+  if (btn) btn.classList.add(cfg.activeCls);
+
+  // Show info panel
+  const panel = document.getElementById('type-info-panel');
+  panel.style.display = 'block';
+  panel.style.borderColor = cfg.color + '55';
+  panel.style.boxShadow = `0 0 12px ${cfg.color}22`;
+  document.getElementById('type-info-content').innerHTML = cfg.info;
+
+  // Scroll code block into view smoothly
+  const firstLine = document.getElementById(cfg.lines[0]);
+  if (firstLine) {
+    firstLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+</script>
+</body>
+</html>

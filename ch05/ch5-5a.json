@@ -1,0 +1,345 @@
+{
+  "name": "ch5-5a",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "content",
+        "filePath": "C:\\n8n-data\\ch05\\ch5-5\\customer_service.xlsx",
+        "detectChanges": [
+          "add"
+        ],
+        "advancedSettings": {}
+      },
+      "type": "n8n-nodes-excel-watcher.excelWatcher",
+      "typeVersion": 1,
+      "position": [
+        0,
+        416
+      ],
+      "id": "25bf4cb1-1754-499f-bb96-37bea5700c65",
+      "name": "Excel Watcher"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位客服資料分類專家。\n請分析以下客戶問題，判斷屬於哪一類別，並提供簡短摘要。\n\n客戶問題：{{ $json['訊息內容'] }}\n\n請用 JSON 格式回覆，格式如下：\n{\n  \"category\": \"技術類\",   // 只能是：技術類、業務類、物流類 其中之一\n  \"summary\": \"問題摘要\"   // 20字以內的問題摘要\n}\n\n分類原則：\n- 技術類：系統問題、登入、軟體、App、API、網頁顯示異常\n- 業務類：價格、授權、合約、報價、升級方案、折扣優惠\n- 物流類：訂單、出貨、配送、退貨、地址修改、包裹\n\n只輸出 JSON，不要其他說明文字。\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        176,
+        416
+      ],
+      "id": "85f8c807-2148-4b4e-83d4-3084c224857a",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        128,
+        608
+      ],
+      "id": "b3b53b80-f4dd-412d-a0f6-676520e57529",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BE03B8XedTGZrDN2",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['分類'] }}",
+                    "rightValue": "技術類",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ec82f199-6f54-4132-b025-be1bb2304115"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9f74a659-cabd-406f-b6d2-dc52a7d47681",
+                    "leftValue": "={{ $json['分類'] }}",
+                    "rightValue": "業務類",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a74d75fb-1cb1-461a-83d9-d1394d09c88b",
+                    "leftValue": "={{ $json['分類'] }}",
+                    "rightValue": "物流類",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        400
+      ],
+      "id": "59f20f19-4e6d-43c6-9a8a-acc454246707",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7e0e1afd-85a5-4ff9-bc7e-9fa32a172a20",
+              "name": "記錄編號",
+              "value": "={{ $('Excel Watcher').item.json['記錄編號'] }}",
+              "type": "string"
+            },
+            {
+              "id": "00ab5f53-0d16-4b10-a0aa-b93b940c15dc",
+              "name": "提交時間",
+              "value": "={{ $('Excel Watcher').item.json['提交時間'] }}",
+              "type": "string"
+            },
+            {
+              "id": "efb456ba-5ba3-4026-828c-23bd04d049cd",
+              "name": "客戶姓名",
+              "value": "={{ $('Excel Watcher').item.json['客戶姓名'] }}",
+              "type": "string"
+            },
+            {
+              "id": "f6f533ba-8ea0-4576-bec2-60060b1dee37",
+              "name": "客戶Email",
+              "value": "={{ $('Excel Watcher').item.json['客戶Email'] }}",
+              "type": "string"
+            },
+            {
+              "id": "b26076d6-1aa7-4a1d-85b6-dea20b70c0f8",
+              "name": "聯絡電話",
+              "value": "={{ $('Excel Watcher').item.json['聯絡電話'] }}",
+              "type": "string"
+            },
+            {
+              "id": "6af9c5f7-6734-4e66-bd00-1fd5e70c2b61",
+              "name": "訊息內容",
+              "value": "={{ $('Excel Watcher').item.json['訊息內容'] }}",
+              "type": "string"
+            },
+            {
+              "id": "c8235d4e-e29e-4dab-9947-0bab1a6a6d7f",
+              "name": "分類",
+              "value": "={{ JSON.parse($json.text).category }}",
+              "type": "string"
+            },
+            {
+              "id": "7bf39d4e-2a30-456c-bbf1-90f4cbbd28fa",
+              "name": "處理狀態",
+              "value": "待處理",
+              "type": "string"
+            },
+            {
+              "id": "0f064c86-3852-49d6-976c-0726c5bb69bd",
+              "name": "備註",
+              "value": "={{ JSON.parse($json.text).summary }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        416
+      ],
+      "id": "58d7e10e-dcff-4601-9c7d-aa04a47a2a55",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "filePath": "C:/n8n-data/ch05/ch5-5/customer_service_result.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "技術類",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        832,
+        272
+      ],
+      "id": "7cf41c6f-1602-4a5d-acae-a6681fe7a16f",
+      "name": "Add row to Excel1"
+    },
+    {
+      "parameters": {
+        "filePath": "C:/n8n-data/ch05/ch5-5/customer_service_result.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "業務類",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        832,
+        432
+      ],
+      "id": "e8f9fe16-03aa-4124-9755-b8df828f1f24",
+      "name": "Add row to Excel2"
+    },
+    {
+      "parameters": {
+        "filePath": "C:/n8n-data/ch05/ch5-5/customer_service_result.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "物流類",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        832,
+        592
+      ],
+      "id": "19ce5c12-ddad-4dde-baa2-db297ed242d7",
+      "name": "Add row to Excel3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Excel Watcher": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Add row to Excel1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add row to Excel2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add row to Excel3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c682af1e-9138-4655-97b6-76ce32f2ff52",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "4F7mRQVXubzLsjhz",
+  "tags": []
+}

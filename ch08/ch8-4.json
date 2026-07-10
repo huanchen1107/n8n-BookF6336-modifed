@@ -1,0 +1,236 @@
+{
+  "name": "ch8-4",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是 Excel 客戶管理助手。\n\n檔案資訊\n- 欄位結構：Name（姓名）, Email（電子郵件）, Status（狀態）, City（城市）\n- 行號說明：第 1 行是標題列，客戶資料從第 2 行開始\n\n工具：\n- Excel_ReadAll：讀取所有客戶\n- Excel_FilterByStatus：依狀態篩選（參數：status）  \n- Excel_Add：新增客戶（參數：customerData）\n  如果提供的客戶資料不完整, 請要求提供完整資料.\n- Excel_Update：更新客戶（參數：rowNumber, updateData）\n  如果更新資料沒有提供rowNumber，而是篩選條件，請自行先使用Excel_ReadAll工具取得全部資料來找出rowNumber後，再更新客戶資料。\n\n用繁體中文回覆，操作完成後簡短確認。\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        240,
+        0
+      ],
+      "id": "d4b39061-fa09-4838-b1bd-e0e86c3a28e4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8a58db1d-6273-4616-99fd-22bfc5c50bd8",
+      "name": "When chat message received",
+      "webhookId": "916a61e0-13e0-4b52-84ac-0d2523d25814"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        224
+      ],
+      "id": "89878013-1c10-4c8e-8c34-45b1ca04d4af",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BE03B8XedTGZrDN2",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "讀取 Excel 檔案中的所有客戶資料，回傳包含 Name、Email、Status、City 的完整清單。",
+        "filePath": "C:/n8n-data/ch08/customers.xlsx",
+        "sheetNameOptions": "工作表1"
+      },
+      "type": "n8n-nodes-excel-ai.excelAITool",
+      "typeVersion": 1,
+      "position": [
+        304,
+        240
+      ],
+      "id": "4df1488b-0ca7-4d44-8ef9-000c31fd1952",
+      "name": "Excel_ReadAll"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "在 Excel 末尾新增一筆客戶資料。customerData 需包含所有欄位：Name、Email、Status、City。",
+        "filePath": "C:/n8n-data/ch08/customers.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "工作表1",
+        "rowData": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Row_Data', `新增一筆客戶資料到 Excel。\n請提供包含以下欄位的 JSON 物件：\n- Name（姓名，字串）\n- Email（電子郵件，字串）\n- Status（狀態，字串：Active / Inactive / Pending）\n- City（城市，字串）\n\n範例：{ \"Name\": \"張小明\", \"Email\": \"ming@email.com\", \"Status\": \"Active\", \"City\": \"台北\" }\n`, 'json') }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAITool",
+      "typeVersion": 1,
+      "position": [
+        576,
+        240
+      ],
+      "id": "932981eb-215c-4838-8efa-07737659b1de",
+      "name": "Excel_Add"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "更新指定行號的客戶資料。rowNumber 從 2 開始（第 2 行是第 1 筆客戶）。updateData 為要更新的欄位 JSON 物件。",
+        "filePath": "C:/n8n-data/ch08/customers.xlsx",
+        "operation": "updateRow",
+        "sheetNameOptions": "工作表1",
+        "rowNumber": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Row_Number', `要更新的目標行號（數字）。\n第 1 行是標題列，客戶資料從第 2 行開始。\n請先用 Excel_ReadAll 確認客戶所在行號後再傳入。\n範例：3（代表第 3 列，即第 2 筆客戶）\n`, 'number') }}",
+        "updatedData": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Updated_Data', `要更新的欄位資料，以 JSON 物件格式傳入。\n只需包含要修改的欄位，不必填寫全部欄位。\n可更新欄位：Name、Email、Status、City\n\n範例（只改狀態）：{ \"Status\": \"Inactive\" }\n範例（同時改多欄）：{ \"Email\": \"new@mail.com\", \"City\": \"台中\" }\n`, 'json') }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAITool",
+      "typeVersion": 1,
+      "position": [
+        688,
+        240
+      ],
+      "id": "499053c9-03fb-41a4-8865-ef1513bf15de",
+      "name": "Excel_Update"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "依 status 參數篩選客戶。status 可為：Active、Inactive、Pending 等狀態值。",
+        "filePath": "C:/n8n-data/ch08/customers.xlsx",
+        "operation": "filterRows",
+        "sheetNameOptions": "工作表1",
+        "filterConditions": {
+          "conditions": [
+            {
+              "field": "Status",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-excel-ai.excelAITool",
+      "typeVersion": 1,
+      "position": [
+        448,
+        240
+      ],
+      "id": "a87860e0-0a8f-44bc-8acc-5e011e0895e4",
+      "name": "Excel_FilterByStatus"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        224
+      ],
+      "id": "dd8ee3ad-b1f8-4407-9f39-fdd965eae932",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel_Add": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel_Update": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel_FilterByStatus": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel_ReadAll": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "82914edb-c886-46d3-8776-ac34aadc9ba1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "ipmtIedKMzJNKSgm",
+  "tags": []
+}

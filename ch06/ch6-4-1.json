@@ -1,0 +1,214 @@
+{
+  "name": "ch6-4-1",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "87ba115b-1c2b-4c0b-a4a0-6c8932733683",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch06\\待辦事項提醒.xlsx",
+        "sheetNameOptions": "待辦事項提醒"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        192,
+        0
+      ],
+      "id": "08791362-2e4f-4ac5-bae1-ec994b3b994e",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/broadcast",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.Token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\t\"messages\": [\n\t\t{\n\t\t\t\"type\": \"text\",\n\t\t\t\"text\": \"🚨 待辦提醒：{{ $json['事項內容'] }}，截止日：{{ $json['截止日期'] }}\"\n\t\t}\n\t]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        672,
+        0
+      ],
+      "id": "b94b8bd8-5d29-4566-abd5-a04e5e09c4a1",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "77c9c48b-85e6-4c70-a645-c83dfd74880e",
+              "leftValue": "={{ $json['狀態'] }}",
+              "rightValue": "待辦",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "07cd1652-57a2-49e5-8132-9efe6528a56f",
+              "leftValue": "={{ $json['是否已通知'] }}",
+              "rightValue": "否",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        352,
+        0
+      ],
+      "id": "76813f65-03d0-4219-854c-c11f8f7cc444",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch06\\待辦事項提醒.xlsx",
+        "operation": "updateRow",
+        "sheetNameOptions": "待辦事項提醒",
+        "rowNumber": "={{ $('Filter').item.json._rowNumber }}",
+        "updatedData": "{ \"是否已通知\": \"是\" }"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "8705cd0e-6189-43d6-aed3-c1655cc28f77",
+      "name": "Update row in Excel"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "819027ad-a220-4f70-9420-c8bbb715cfcd",
+              "name": "Token",
+              "value": "<Channel Access Token>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        0
+      ],
+      "id": "1123088d-ff73-442d-97d8-2b03ad167f07",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Update row in Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "16b1ad26-045e-4c2c-9acf-d2080b5a7723",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "4CBFJbEjaj6SbfZA",
+  "tags": []
+}

@@ -1,0 +1,16 @@
+Excel資料驗證與錯誤處理的提示詞範本：ch9-5-1i.txt
+請寫一個完整的Python程式：
+輸入輸出：透過命令列參數接收，使用 sys.argv 取得參數，sys.argv[1] 為來源Excel檔案路徑，sys.argv[2] 為輸出Excel檔案路徑
+驗證需求：
+- 檢查必要欄位是否存在：['col1', 'col2', 'col3']
+- 驗證資料型態：df['amount'].dtype == 'float64'
+- 檢查數值範圍：(df['price'] > 0).all()
+- 檢查缺失值：df.isnull().sum()
+- 找出重複值：df.duplicated().sum()
+錯誤處理：
+- 使用 try-except 捕捉錯誤
+- 將驗證報告印出至終端機
+- 將清理後的資料或錯誤摘要存為Excel檔案
+輸出：將結果存為Excel檔案
+使用範例：
+python validate.py C:\data\raw.xlsx C:\data\validation_report.xlsx

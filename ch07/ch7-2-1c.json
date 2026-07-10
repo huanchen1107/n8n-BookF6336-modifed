@@ -1,0 +1,257 @@
+{
+  "name": "ch7-2-1c",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "C:\\n8n-data\\ch07\\temp",
+        "events": [
+          "add"
+        ],
+        "options": {
+          "depth": 0
+        }
+      },
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        144
+      ],
+      "id": "ae53061c-a186-4b0a-9cd4-c16ef1bbbb60",
+      "name": "Local File Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0163ae4e-e8e2-446b-a108-9fd46286792f",
+              "name": "fullPath",
+              "value": "={{ $json.path.replace(/\\//g, '\\\\') }}",
+              "type": "string"
+            },
+            {
+              "id": "47c5f4f9-3af8-40bd-8edd-cea17afe4a2c",
+              "name": "fileName",
+              "value": "={{ $json.path.split('\\\\').pop() }}",
+              "type": "string"
+            },
+            {
+              "id": "34266bca-d81a-4e1b-85dc-eda1d0bd904b",
+              "name": "ext",
+              "value": "={{ $json.path.split('.').pop().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "18a8c1d8-72b8-4b07-aa50-eff3df244e79",
+              "name": "datePrefix",
+              "value": "={{ $now.toFormat('yyyyMMdd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -368,
+        144
+      ],
+      "id": "a7f31583-9143-4d69-954b-8e5aea820c7a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.ext }}",
+                    "rightValue": "pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b5565ed7-7968-4305-96b4-5f40db5eb093"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f076a65f-48a3-4db7-a6c5-f48814f70529",
+                    "leftValue": "={{ $json.ext }}",
+                    "rightValue": "xlsx",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a29fff72-3d5b-409f-908b-bc367d917e74",
+                    "leftValue": "={{ [\"png\", \"jpg\", \"gif\"].includes($json.ext) }}",
+                    "rightValue": "png",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        128
+      ],
+      "id": "b48c2fd5-8a2e-4d0a-a103-d79398d33b44",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "sourcePath": "={{ $('Edit Fields').item.json.fullPath }}",
+        "destinationPath": "=C:/n8n-data/ch07/temp/PDF/{{ $('Edit Fields').item.json.datePrefix }}_{{ $('Edit Fields').item.json.fileName }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "90522ca2-d3ce-4615-b1a1-a60e5f9f5c18",
+      "name": "File Manager AI"
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "sourcePath": "={{ $('Edit Fields').item.json.fullPath }}",
+        "destinationPath": "=C:/n8n-data/ch07/temp/Excel/{{ $('Edit Fields').item.json.datePrefix }}_{{ $('Edit Fields').item.json.fileName }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        0,
+        144
+      ],
+      "id": "d6ee2edc-7315-41a0-8f8a-7e54b55ac9fb",
+      "name": "File Manager AI1"
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "sourcePath": "={{ $('Edit Fields').item.json.fullPath }}",
+        "destinationPath": "=C:/n8n-data/ch07/temp/Images/{{ $('Edit Fields').item.json.datePrefix }}_{{ $('Edit Fields').item.json.fileName }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        0,
+        288
+      ],
+      "id": "96061b23-00c5-4482-9b48-5e8836ca4926",
+      "name": "File Manager AI2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Local File Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "File Manager AI1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "File Manager AI2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "74df5f4d-b03a-4c5f-84e9-fb1ecbcb62cc",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "u9tPlO0UJEGclOvn",
+  "tags": []
+}

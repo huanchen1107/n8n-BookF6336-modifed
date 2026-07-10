@@ -1,0 +1,225 @@
+{
+  "name": "ch8-5",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c406f4a8-dbae-4a79-a9ff-be81e9cbf3ce",
+      "name": "When chat message received",
+      "webhookId": "1e7569cd-8ee3-4da9-a210-76d4d7995da6"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是一個工作日誌管理助手，幫助使用者記錄、追加與查閱工作日誌。\n\n【日誌存放規則】\n- 根目錄：C:/n8n-data/ch08/WorkLog/\n- 資料夾格式：C:/n8n-data/ch08/WorkLog/YYYY-MM/（例如 C:/n8n-data/ch08/WorkLog/2026-03/）\n- 檔案格式：C:/n8n-data/ch08/WorkLog/YYYY-MM/YYYY-MM-DD.txt（例如 C:/n8n-data/ch08/WorkLog/2026-03/2026-03-23.txt）\n- 今天的日期請從系統時間取得\n\n【各工具使用時機】\n- FM_Create：當月份資料夾或當日檔案不存在時，先建立再寫入\n- FM_Write：當日誌檔案不存在，第一次寫入當天日誌時使用（寫入標題與第一筆記錄）\n- FM_Append：日誌已存在，追加新記錄時使用（不覆蓋原有內容）\n- FM_Read：使用者要查閱日誌內容時使用\n\n【寫入格式】\n- 第一次建立當日日誌（FM_Write）：\n  === 工作日誌 YYYY-MM-DD ===\\n\\n[HH:MM] 使用者說的內容\\n\n- 追加記錄（FM_Append）：\n  [HH:MM] 使用者說的內容\\n\n\n【回覆原則】\n- 完成操作後，用繁體中文簡短回覆執行結果\n- 讀取日誌時，完整顯示檔案內容\n- 若使用者沒有指定日期，一律操作今天的日誌\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        160,
+        0
+      ],
+      "id": "0d1ce865-33cb-4804-a4d0-2ac20f1ecfc2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        224
+      ],
+      "id": "449f14b2-25f5-4da2-bdca-223061cecbce",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "建立新的資料夾。\n當月份資料夾（例如 C:/n8n-data\\ch08WorkLog/2025-03/）尚未存在時使用。\n只用來建立資料夾，不建立檔案。\n",
+        "operation": "create",
+        "sourcePath": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Source_Path', ``, 'string') }}",
+        "createType": "folder"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAiTool",
+      "typeVersion": 1,
+      "position": [
+        208,
+        224
+      ],
+      "id": "aeb8b633-de3d-44aa-84ba-27123f3720f6",
+      "name": "FM_Create"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "將文字內容寫入檔案（完整覆蓋）。\n當天日誌檔案不存在時，用來建立新檔案並寫入標題與第一筆記錄。\n若檔案已存在會覆蓋，所以只在第一次建立當日日誌時使用。\n追加新記錄請改用 FM_Append。\n",
+        "operation": "write",
+        "targetPath": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Target_Path', ``, 'string') }}",
+        "data": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Content', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAiTool",
+      "typeVersion": 1,
+      "position": [
+        304,
+        224
+      ],
+      "id": "cd36e953-17d3-4854-85b8-182715ddf63c",
+      "name": "FM_Write"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "在現有檔案末尾追加文字，不覆蓋原有內容。\n當天日誌檔案已存在，要新增一筆記錄時使用。\n若不確定檔案是否存在，請先用 FM_Write 建立，再用 FM_Append 追加。\n",
+        "operation": "append",
+        "targetPath": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Target_Path', ``, 'string') }}",
+        "data": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Content', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAiTool",
+      "typeVersion": 1,
+      "position": [
+        400,
+        224
+      ],
+      "id": "5e243b68-029b-407f-8c22-911d799fe19d",
+      "name": "FM_Append"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "讀取並回傳文字檔案的完整內容。\n使用者要查看日誌記錄時使用。\n若使用者沒有指定日期，讀取今天的日誌檔案。\n",
+        "operation": "read",
+        "targetPath": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Target_Path', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAiTool",
+      "typeVersion": 1,
+      "position": [
+        496,
+        224
+      ],
+      "id": "db967d84-646d-4581-bdf4-1ae2e1ea9c60",
+      "name": "FM_Read"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        224
+      ],
+      "id": "e025340d-516a-4df4-89cf-5f5cd283b51c",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BE03B8XedTGZrDN2",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FM_Create": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FM_Write": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FM_Append": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FM_Read": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "65b3c4e2-cec0-430b-a0dc-b673f0eebde4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "p9LPRNScgUNIOZBN",
+  "tags": []
+}

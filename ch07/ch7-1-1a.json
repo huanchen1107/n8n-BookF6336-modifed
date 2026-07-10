@@ -1,0 +1,103 @@
+{
+  "name": "ch7-1-1a",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2f8c1d01-12e0-4779-afc3-7a393a059989",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "cmd /c if not exist \"C:\\n8n-data\\ch07\\sales\\Output\" mkdir \"C:\\n8n-data\\ch07\\sales\\Output\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "01f1c95e-177e-4a3a-b507-050d6e7dc852",
+      "name": "Execute Command-make_dir"
+    },
+    {
+      "parameters": {
+        "command": "cmd /c move \"C:\\n8n-data\\ch07\\sales\\業績資料.xlsx\" \"C:\\n8n-data\\ch07\\sales\\Output\\業績資料.xlsx\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        336,
+        0
+      ],
+      "id": "ed26aaca-dc1a-4362-accc-ac53a79257cc",
+      "name": "Execute Command-move_file"
+    },
+    {
+      "parameters": {
+        "command": "cmd /c rename \"C:\\n8n-data\\ch07\\sales\\Output\\業績資料.xlsx\" \"公司業績資料.xlsx\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "f1e3bf40-1ec6-46ab-a1f3-ef2f0c4492a6",
+      "name": "Execute Command-rename file"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Execute Command-make_dir",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command-make_dir": {
+      "main": [
+        [
+          {
+            "node": "Execute Command-move_file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command-move_file": {
+      "main": [
+        [
+          {
+            "node": "Execute Command-rename file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "87deec9f-65c3-4094-b457-a9a3456c33c9",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "UR8NlLu3EdXfP0B7",
+  "tags": []
+}

@@ -1,0 +1,574 @@
+{
+  "name": "ch4-4b",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        160
+      ],
+      "id": "ba772cf3-a643-4bc7-bdf2-4361ab08dab5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\飲料訂單資料.xlsx",
+        "sheetNameOptions": "訂單資料",
+        "includeRowNumber": false
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        64
+      ],
+      "id": "3c8de81f-96ca-4b35-8c20-ab2e6c7ea38f",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "訂單編號",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        304
+      ],
+      "id": "baf591e7-47ac-44e1-a145-794d2d5af9e8",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "數量"
+            },
+            {
+              "aggregation": "sum",
+              "field": "總價"
+            },
+            {
+              "aggregation": "countUnique",
+              "field": "訂單編號"
+            },
+            {
+              "aggregation": "average",
+              "field": "總價"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "飲料,建立日期",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "c94a12f4-bed7-48f6-a889-6725f1f188c0",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a455fd62-aa88-427f-b3d1-53e5876d9789",
+              "name": "建立日期",
+              "value": "={{ $json[\"建立時間\"].split(' ')[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        176
+      ],
+      "id": "f95763a0-ab72-4358-ab18-c6524ac049f8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de3d6a71-bda6-455d-8750-006eb9ac7abb",
+              "name": "飲料",
+              "value": "={{ $json.飲料 }}",
+              "type": "string"
+            },
+            {
+              "id": "2c27cdb9-b22d-447a-ba56-8e6d397f5421",
+              "name": "建立日期",
+              "value": "={{ $json.建立日期 }}",
+              "type": "string"
+            },
+            {
+              "id": "dc35d7fe-c64f-4bbe-b047-6c926d0b48af",
+              "name": "總數量",
+              "value": "={{ $json.sum_數量 }}",
+              "type": "number"
+            },
+            {
+              "id": "acc8392a-416b-4f5b-a087-272a58a7faee",
+              "name": "總金額",
+              "value": "={{ $json.sum_總價 }}",
+              "type": "number"
+            },
+            {
+              "id": "38677c19-513f-4d6e-8db9-cf15acebc52b",
+              "name": "訂單數",
+              "value": "={{ $json.unique_count_訂單編號 }}",
+              "type": "number"
+            },
+            {
+              "id": "933f00b4-fd69-4fcf-b8ba-db478933d65d",
+              "name": "平均客單價",
+              "value": "={{ $json.average_總價 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        0
+      ],
+      "id": "797b2521-bb09-49ff-9e87-fc790d0f3d42",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        0
+      ],
+      "id": "e13878d8-7e8f-404d-a681-89f0b8aa3cd9",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:\\n8n-data\\ch04\\飲料訂單資料_樞紐分析_多維度.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "9678bc38-995f-49ce-b1b9-ae5ce036f2f4",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "數量"
+            },
+            {
+              "aggregation": "sum",
+              "field": "總價"
+            },
+            {
+              "aggregation": "countUnique",
+              "field": "訂單編號"
+            },
+            {
+              "aggregation": "average",
+              "field": "總價"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "飲料",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        176
+      ],
+      "id": "c3c303ce-d4c9-4f64-b633-05074d62bce4",
+      "name": "Summarize1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de3d6a71-bda6-455d-8750-006eb9ac7abb",
+              "name": "飲料",
+              "value": "={{ $json.飲料 }}",
+              "type": "string"
+            },
+            {
+              "id": "dc35d7fe-c64f-4bbe-b047-6c926d0b48af",
+              "name": "總數量",
+              "value": "={{ $json.sum_數量 }}",
+              "type": "number"
+            },
+            {
+              "id": "acc8392a-416b-4f5b-a087-272a58a7faee",
+              "name": "總金額",
+              "value": "={{ $json.sum_總價 }}",
+              "type": "number"
+            },
+            {
+              "id": "38677c19-513f-4d6e-8db9-cf15acebc52b",
+              "name": "訂單數",
+              "value": "={{ $json.unique_count_訂單編號 }}",
+              "type": "number"
+            },
+            {
+              "id": "933f00b4-fd69-4fcf-b8ba-db478933d65d",
+              "name": "平均客單價",
+              "value": "={{ $json.average_總價 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        176
+      ],
+      "id": "519c7e82-d296-4f2a-afd8-f324153a3f94",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        176
+      ],
+      "id": "7ac4f590-bfb5-4f6d-b226-13dd92dfe4be",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:\\n8n-data\\ch04\\飲料訂單資料_樞紐分析_按品項.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        176
+      ],
+      "id": "1b051e2a-804a-4d53-b7dd-b797e3d140bc",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "數量"
+            },
+            {
+              "aggregation": "sum",
+              "field": "總價"
+            },
+            {
+              "aggregation": "countUnique",
+              "field": "訂單編號"
+            },
+            {
+              "aggregation": "average",
+              "field": "總價"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "建立日期",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        368
+      ],
+      "id": "2d5aa126-28a0-4de8-969c-9b50d0ba34f8",
+      "name": "Summarize2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2c27cdb9-b22d-447a-ba56-8e6d397f5421",
+              "name": "建立日期",
+              "value": "={{ $json.建立日期 }}",
+              "type": "string"
+            },
+            {
+              "id": "dc35d7fe-c64f-4bbe-b047-6c926d0b48af",
+              "name": "總數量",
+              "value": "={{ $json.sum_數量 }}",
+              "type": "number"
+            },
+            {
+              "id": "acc8392a-416b-4f5b-a087-272a58a7faee",
+              "name": "總金額",
+              "value": "={{ $json.sum_總價 }}",
+              "type": "number"
+            },
+            {
+              "id": "38677c19-513f-4d6e-8db9-cf15acebc52b",
+              "name": "訂單數",
+              "value": "={{ $json.unique_count_訂單編號 }}",
+              "type": "number"
+            },
+            {
+              "id": "933f00b4-fd69-4fcf-b8ba-db478933d65d",
+              "name": "平均客單價",
+              "value": "={{ $json.average_總價 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        368
+      ],
+      "id": "e44acf3e-57ea-4fe1-945e-7503f51bde44",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        288,
+        368
+      ],
+      "id": "17abf60d-3925-4fa4-89ec-3bb991100799",
+      "name": "Convert to File2"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:\\n8n-data\\ch04\\飲料訂單資料_樞紐分析_按日期.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        368
+      ],
+      "id": "95c5233c-50ce-4659-82d5-e55dc0ba0eb8",
+      "name": "Read/Write Files from Disk2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Summarize1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Summarize2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "521ec18b-dfe6-4a3a-88e1-9249a429aeb4",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "oegC3tZ10kNEakJo",
+  "tags": []
+}

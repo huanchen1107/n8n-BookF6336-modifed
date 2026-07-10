@@ -1,0 +1,168 @@
+{
+  "name": "ch8-3-2",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "046018cc-dcac-4609-aae3-cff605540fb0",
+      "name": "When chat message received",
+      "webhookId": "a2273480-758e-478f-8b0c-8a043d105d21"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是一個樂於助人的 AI 助理。\n\n你可以使用以下工具：\n\n## OpenWeatherMap Tool\n當使用者詢問任何與天氣相關的問題時，請使用此工具查詢即時天氣資訊。\n\n**觸發時機：**\n- 使用者詢問某地點目前的天氣狀況\n- 使用者詢問氣溫、濕度、風速、降雨等天氣細節\n- 使用者詢問「今天會不會下雨？」、「現在幾度？」等問題\n\n**使用方式：**\n將使用者提到的地點名稱作為 query 參數傳入工具。\n- 若使用者說「台北的天氣」→ query 填入「台北」或「Taipei」\n- 若使用者說「東京現在幾度」→ query 填入「Tokyo」\n- 若使用者說「幫我查高雄天氣」→ query 填入「Kaohsiung」\n\n**注意事項：**\n- 地點名稱建議使用英文，查詢結果較準確\n- 若使用者未指定地點，請先詢問「請問您想查詢哪個城市的天氣？」\n- 若使用者提到的是模糊地點（例如「我家附近」），請要求使用者提供明確的城市名稱\n- 收到工具回傳的天氣資料後，請用自然語言整理並回覆使用者，例如：\n  「台北目前氣溫 28°C，天氣晴朗，濕度 65%，風速 3 m/s。」\n\n重要：所有天氣查詢都必須透過 OpenWeatherMap Tool 執行，不可使用自身訓練資料中的天氣資訊作答，因為那些資料並非即時的。\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ec5283b3-6ae4-4080-b0e7-f6b4d8e0d4fa",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama3.1:8b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "89ad522d-037e-4c30-a183-20919e75fbb1",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "EmWfBTlgl0dbD2WL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        208
+      ],
+      "id": "09bb173a-5d11-4c91-9a47-08713749c897",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "description": "呼叫 OpenWeatherMap Workflow 取得今天的天氣資料\n參數: \n   query: string 是英文城市名稱, 如果是中文請譯成英文",
+        "workflowId": {
+          "__rl": true,
+          "value": "HjqvNaPBU3rc8ylE",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/HjqvNaPBU3rc8ylE",
+          "cachedResultName": "ch8-3-2-tool"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        208
+      ],
+      "id": "e95c597e-1a61-479b-8860-3bea620347db",
+      "name": "OpenWeatherMap Tool"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2f6de4cb-022d-4af4-a811-53b5efd8f204",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "qRCC79rcMaWaCv8A",
+  "tags": []
+}

@@ -1,0 +1,81 @@
+{
+  "name": "ch9-2-2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "202da7ae-f023-4871-bfbe-88a355a1748a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch09\\員工資料.xlsx",
+        "sheetNameOptions": "Sheet1",
+        "includeRowNumber": false
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        192,
+        0
+      ],
+      "id": "cff602f4-bcc5-40df-a509-6936d11c64a6",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst grouped = {};\n\nfor (const item of items) {\n  const { 姓名, 年齡, 部門 } = item.json;\n  if (!grouped[部門]) {\n    grouped[部門] = { total: 0, count: 0 };\n  }\n  grouped[部門].total += 年齡;\n  grouped[部門].count += 1;\n}\n\nconst result = {};\nfor (const [dept, { total, count }] of Object.entries(grouped)) {\n  result[dept] = Math.round(total / count);\n}\n\nreturn [{ json: result }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        0
+      ],
+      "id": "1c4ec7bd-1702-4809-aa3a-3e47fb9ed960",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "18f6c389-c3aa-43a7-8193-0b2d7188881b",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "3dawFTrMUbpSeh0I",
+  "tags": []
+}

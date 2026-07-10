@@ -1,0 +1,16 @@
+openpyxl條件格式化的提示詞範本：ch9-5-1g.txt
+請寫一個完整的Python程式：
+輸入輸出：透過命令列參數接收，使用 sys.argv 取得參數，sys.argv[1] 為來源Excel檔案路徑，sys.argv[2] 為輸出Excel檔案路徑
+使用套件：openpyxl、pandas
+格式化需求：
+- 條件1：［欄位］>［值］→ 字體顏色紅色
+- 條件2：［欄位］包含［關鍵字］→ 背景黃色
+- 條件3：［條件］→ 加粗／斜體
+步驟：
+1. 用pandas讀取資料並處理
+2. 用 pd.ExcelWriter(output_path, engine='openpyxl') 寫出
+3. 使用 openpyxl.styles（Font、PatternFill）
+4. 迴圈處理儲存格套用樣式後存檔
+輸出：將格式化後的Excel存檔
+使用範例：
+python style.py C:\data\report.xlsx C:\data\styled.xlsx

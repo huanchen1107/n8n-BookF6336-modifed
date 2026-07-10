@@ -1,0 +1,158 @@
+{
+  "name": "ch8-3-1a",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "0ec4717d-6ac4-4775-a620-deb8e52822b4",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        592,
+        400
+      ],
+      "webhookId": "942eb293-8429-434d-a217-b7113baaaac7",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "你是一位n8n專家的AI助理。\n\n你可以使用以下工具：\n\n## Calculator\n當使用者要求你進行任何數學計算時，請使用此工具，例如：\n- 加法、減法、乘法、除法\n- 百分比計算\n- 複雜的數學公式或運算式\n\n重要：所有涉及數字的計算，都必須透過 Calculator 工具來執行，不可自行心算或估算。\n\n## Wikipedia\n當使用者詢問人物、歷史事件、地點、科學概念等知識性問題時，使用此工具查詢。\n注意：查詢時請使用英文關鍵字，以確保能取得正確的 Wikipedia 結果。\n例如：查詢「愛因斯坦」請用 \"Albert Einstein\"，查詢「台灣」請用 \"Taiwan\"。"
+        }
+      },
+      "id": "1066a754-31f2-4de4-b710-bc4cc5881fcb",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        832,
+        400
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "model": "llama3.1:8b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        704,
+        592
+      ],
+      "id": "99262b98-9478-4087-8752-1afd615f6612",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "EmWfBTlgl0dbD2WL",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        592
+      ],
+      "id": "c5b96b0f-4f0a-4d1a-93ef-549e70250ebf",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1008,
+        592
+      ],
+      "id": "c8ad5039-580d-4846-b904-cb9d9857b213",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        592
+      ],
+      "id": "3cc27f60-113e-4d88-bc4f-5930f396d382",
+      "name": "Wikipedia"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "65114d3f-1178-45f2-8f6d-85cddb035fc3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "W5JxYXoB9urAqBi3",
+  "tags": []
+}

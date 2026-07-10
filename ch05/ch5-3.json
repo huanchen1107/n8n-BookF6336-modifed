@@ -1,0 +1,180 @@
+{
+  "name": "ch5-3",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "content",
+        "filePath": "C:\\n8n-data\\ch05\\ch5-3\\inventory.xlsx",
+        "sheetName": "庫存",
+        "detectChanges": [
+          "update"
+        ],
+        "advancedSettings": {}
+      },
+      "type": "n8n-nodes-excel-watcher.excelWatcher",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7d1f8213-4b00-4171-a70a-56b8dc2d41bd",
+      "name": "Excel Watcher"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3b942961-195b-4b6b-8ce8-1c2f4f351551",
+              "leftValue": "={{ Number($json['庫存數量']) }}",
+              "rightValue": "={{ Number($json['安全庫存']) }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        0
+      ],
+      "id": "d914b3c3-b000-4716-85db-0b3e2117fbd3",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6d1ab6dd-7193-4022-b842-23a60459dd2c",
+              "name": "商品編號",
+              "value": "={{ $json.商品編號 }}",
+              "type": "string"
+            },
+            {
+              "id": "aecf243d-182e-4769-a79b-770c857fed3e",
+              "name": "商品名稱",
+              "value": "={{ $json.商品名稱 }}",
+              "type": "string"
+            },
+            {
+              "id": "d11220e4-b0d1-4941-9ea0-c34435c26ace",
+              "name": "目前庫存",
+              "value": "={{ $json.庫存數量 }}",
+              "type": "number"
+            },
+            {
+              "id": "3768ad0f-e710-49c7-9103-4f8947a9a311",
+              "name": "安全庫存",
+              "value": "={{ $json.安全庫存 }}",
+              "type": "number"
+            },
+            {
+              "id": "05e9b1d3-a648-4e19-a5a9-600535492cea",
+              "name": "建議補貨量",
+              "value": "={{ $json['安全庫存'] * 2 - $json['庫存數量'] }}",
+              "type": "number"
+            },
+            {
+              "id": "7592907d-19a0-4217-a54e-3588358eca63",
+              "name": "單價",
+              "value": "={{ $json.單價 }}",
+              "type": "number"
+            },
+            {
+              "id": "2a326b40-5ebb-48ba-b2d8-880524be97af",
+              "name": "補貨時間",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm') }}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        0
+      ],
+      "id": "222596d4-6d7e-4af9-851c-910c52791465",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch05\\ch5-3\\restockList.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "補貨清單",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "a53fb407-7055-4e16-9d32-6b0d3e794bc2",
+      "name": "Add row to Excel"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Excel Watcher": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Add row to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8e487616-daa3-4e8d-b677-280b88ec62da",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "dVtuEzcXao0mhatq",
+  "tags": []
+}

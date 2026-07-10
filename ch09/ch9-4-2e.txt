@@ -1,0 +1,9 @@
+請為 n8n Code 節點 (JavaScript) 寫動態提取程式碼。
+輸入：$input.all()
+資料範例：
+[輸入 JSON，欄位名稱可能變動]
+需求：
+- 動態提取所有包含 [關鍵字] 的欄位
+- 或：提取所有鍵值配對
+- 使用 Object.keys() 和 Object.entries()
+返回：return 處理後的資料陣列

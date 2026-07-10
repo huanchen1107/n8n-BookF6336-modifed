@@ -1,0 +1,243 @@
+{
+  "name": "ch6-5",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        -512,
+        64
+      ],
+      "id": "3c2c13cb-7f42-4ca9-baa8-f7a069461fd0",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "kYIwep4jWGWaKlVt",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.textPlain || '';\nconst chineseChars = (text.match(/[\\u4e00-\\u9fff]/g) || []).length;\nconst totalChars = text.replace(/\\s/g, '').length;\n\nreturn [{\n  json: {\n    isEnglish: totalChars > 0 && (chineseChars / totalChars) < 0.1\n  }\n}];;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        64
+      ],
+      "id": "4c8cab20-d42e-4e63-8d16-9f4892a1bd09",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4ed40389-2910-4b76-a0cf-60644f4cc78a",
+              "leftValue": "={{ $json.isEnglish }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -192,
+        64
+      ],
+      "id": "fb87fd93-1b57-4de3-801f-167731ab3d5d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=原始郵件主旨：{{ $('Email Trigger (IMAP)').item.json.subject }}\n\n原始郵件內文：{{ $('Email Trigger (IMAP)').item.json.textPlain }}"
+            },
+            {
+              "role": "system",
+              "content": "你是一個專業的郵件翻譯助理，請將使用者提供的英文郵件內容和主旨，翻譯成專業、流暢的繁體中文。\n請以 JSON 格式輸出，包含 'subject_zh' 和 'body_zh' 兩個欄位。"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "36038ddc-f280-49b6-a072-ce552edea274",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "oNIFwXwzzn5QyzNJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f14a0a06-db3f-42a6-8201-33c4eacc553d",
+              "name": "中文主旨",
+              "value": "={{ $json.output[0].content[0].text.subject_zh }}",
+              "type": "string"
+            },
+            {
+              "id": "cd6b446b-1f4e-40da-a3e0-f31f77fa8a00",
+              "name": "中文內容",
+              "value": "={{ $json.output[0].content[0].text.body_zh }}",
+              "type": "string"
+            },
+            {
+              "id": "94511876-2de1-4894-93ef-a4421eb92b50",
+              "name": "寄件者",
+              "value": "={{ $('Email Trigger (IMAP)').item.json.from }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        0
+      ],
+      "id": "12e0e5cb-0b34-4850-b72c-8dbb7d19f94b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hueyanchen2020@gmail.com",
+        "toEmail": "test@example.com",
+        "subject": "={{ \"【已翻譯】\" + $json['中文主旨'] }}",
+        "html": "={{ \"--- [原始郵件寄件人: \" + $json['寄件者'] + \"] ---\\n\\n\" + $json['中文內容'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "fbd4fde1-83c0-49e8-94aa-13a0c1a354e5",
+      "name": "Send an Email",
+      "webhookId": "f9cc99c6-7916-4a13-9212-e36e93a4dbd7",
+      "credentials": {
+        "smtp": {
+          "id": "UM06ssDnTxzoirMQ",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "32189864-883a-49c6-9e77-afd8393b44e4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "7sQOD0tsX76GvZ6B",
+  "tags": []
+}

@@ -1,0 +1,251 @@
+{
+  "name": "ch7-1-2",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "C:\\n8n-data\\ch07\\temp",
+        "events": [
+          "add"
+        ],
+        "options": {
+          "depth": 0
+        }
+      },
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        144
+      ],
+      "id": "f629710f-c007-432c-8333-71febbd92086",
+      "name": "Local File Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0163ae4e-e8e2-446b-a108-9fd46286792f",
+              "name": "fullPath",
+              "value": "={{ $json.path.replace(/\\//g, '\\\\') }}",
+              "type": "string"
+            },
+            {
+              "id": "47c5f4f9-3af8-40bd-8edd-cea17afe4a2c",
+              "name": "fileName",
+              "value": "={{ $json.path.split('\\\\').pop() }}",
+              "type": "string"
+            },
+            {
+              "id": "34266bca-d81a-4e1b-85dc-eda1d0bd904b",
+              "name": "ext",
+              "value": "={{ $json.path.split('.').pop().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "18a8c1d8-72b8-4b07-aa50-eff3df244e79",
+              "name": "datePrefix",
+              "value": "={{ $now.toFormat('yyyyMMdd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -368,
+        144
+      ],
+      "id": "ca7bdfa1-870b-4a9c-afe1-d01ba03d5525",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.ext }}",
+                    "rightValue": "pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b5565ed7-7968-4305-96b4-5f40db5eb093"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f076a65f-48a3-4db7-a6c5-f48814f70529",
+                    "leftValue": "={{ $json.ext }}",
+                    "rightValue": "xlsx",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a29fff72-3d5b-409f-908b-bc367d917e74",
+                    "leftValue": "={{ [\"png\", \"jpg\", \"gif\"].includes($json.ext) }}",
+                    "rightValue": "png",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        128
+      ],
+      "id": "93ee05c7-6157-45c3-a990-ff11b48a8549",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "command": "=cmd /c move \"{{ $('Edit Fields').item.json.fullPath }}\" \"C:/n8n-data/ch07/temp/PDF/{{ $('Edit Fields').item.json.datePrefix }}_{{ $('Edit Fields').item.json.fileName }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "e4e7c470-8555-4404-92a1-2cfae11e3495",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "command": "=cmd /c move \"{{ $('Edit Fields').item.json.fullPath }}\" \"C:/n8n-data/ch07/temp/Excel/{{ $('Edit Fields').item.json.datePrefix }}_{{ $('Edit Fields').item.json.fileName }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        144
+      ],
+      "id": "c5748797-457d-4423-9dbe-b6cbdb3e36a6",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "command": "=cmd /c move \"{{ $('Edit Fields').item.json.fullPath }}\" \"C:/n8n-data/ch07/temp/Images/{{ $('Edit Fields').item.json.datePrefix }}_{{ $('Edit Fields').item.json.fileName }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        304
+      ],
+      "id": "f4c2f742-1d71-45ed-928a-222ca76e5c3a",
+      "name": "Execute Command2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Local File Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Command2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "46749f92-79d2-4b88-9990-534f68a362a1",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "hCpI2o4WXYCg5X0T",
+  "tags": []
+}

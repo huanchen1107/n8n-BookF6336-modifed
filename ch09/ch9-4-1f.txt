@@ -1,0 +1,9 @@
+請為n8n Expression欄位寫一個JavaScript單行運算式。
+輸入欄位：來自同一筆資料的多個欄位，例如 $json["first_name"]、$json["last_name"]、$json["order_id"]
+需求：將多個欄位組合成指定格式的字串
+處理情境（擇一描述）：
+- 組合姓名與稱謂：[例如 「王先生您好」]
+- 組合訂單通知文字：[例如 「您的訂單ORD001已於2024/01/15出貨」]
+- 組合網址或路徑字串
+請使用樣板字串（template literal）處理，回傳單行Expression，格式為 {{ 運算式 }}
+使用範例輸入：last_name為「王」、order_id為「ORD001」、ship_date為「2024-01-15」，目標輸出「王先生您好，您的訂單ORD001已於2024/01/15出貨」

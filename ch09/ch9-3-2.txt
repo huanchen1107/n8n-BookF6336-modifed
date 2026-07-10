@@ -1,0 +1,17 @@
+請修改下列HTML網頁中的JavaScript程式碼，用來處理Webhook回應的JSON資料。
+目前HTML表單的送出程式碼：
+［請貼上目前的fetch或XMLHttpRequest程式碼］
+Webhook回應的JSON格式範例：
+［請貼上JSON範例，例如： 
+{
+  "status": "success",
+  "message": "訂單已成功寫入 Excel",
+  "data": { "order_id": "ORD001", "amount": 1500 }
+}］
+需求：
+- 判斷回應的status欄位是否為success或failed
+- 成功時顯示message內容，並將data的欄位值填入指定的HTML元素
+- 失敗時顯示錯誤訊息並標示紅色提示
+- 加入loading狀態，送出期間停用送出按鈕並顯示處理中文字
+- 處理網路錯誤或逾時的例外狀況
+請直接修改並回傳完整JavaScript程式碼區塊。

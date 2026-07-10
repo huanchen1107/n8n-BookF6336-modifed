@@ -1,0 +1,203 @@
+{
+  "name": "ch5-5",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "cs-form",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4c324e84-f13b-45e6-b34f-d78c7abf2b8d",
+      "name": "Webhook",
+      "webhookId": "a9a4b7de-e848-42ff-9279-df68921dde2b"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!DOCTYPE html>\n<html lang=\"zh-TW\">\n<head>\n<meta charset=\"UTF-8\">\n<title>客服聯絡表單</title>\n<style>\n  body { font-family: Arial, sans-serif; max-width: 560px; margin: 60px auto; background: #f0f2f5; }\n  .card { background: white; padding: 36px; border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.1); }\n  h2 { color: #2C3E50; margin-bottom: 6px; }\n  .sub { color: #888; font-size: 13px; margin-bottom: 24px; }\n  label { display: block; font-weight: bold; color: #34495E; margin: 14px 0 5px; font-size: 14px; }\n  input, textarea { width: 100%; padding: 10px 13px; border: 1px solid #ddd; border-radius: 6px;\n    box-sizing: border-box; font-size: 14px; font-family: Arial; }\n  textarea { height: 120px; resize: vertical; }\n  input:focus, textarea:focus { outline: none; border-color: #2C3E50; }\n  button { width: 100%; margin-top: 22px; padding: 13px; background: #2C3E50;\n    color: white; border: none; border-radius: 6px; font-size: 15px;\n    font-weight: bold; cursor: pointer; }\n  button:hover { background: #34495E; }\n  .required { color: #E74C3C; margin-left: 3px; }\n</style>\n</head>\n<body>\n<div class=\"card\">\n  <h2>💬 客服聯絡表單</h2>\n  <p class=\"sub\">請填寫您的問題，我們將盡快為您服務</p>\n  <form action=\"/webhook-test/cs-submit\" method=\"POST\">\n    <label>姓名 <span class=\"required\">*</span></label>\n    <input name=\"customerName\" required placeholder=\"王小明\">\n\n    <label>Email <span class=\"required\">*</span></label>\n    <input name=\"customerEmail\" type=\"email\" required placeholder=\"email@example.com\">\n\n    <label>聯絡電話</label>\n    <input name=\"customerPhone\" placeholder=\"0912-345-678\">\n\n    <label>問題描述 <span class=\"required\">*</span></label>\n    <textarea name=\"message\" required placeholder=\"請詳述您的問題...\"></textarea>\n\n    <button type=\"submit\">📨 送出</button>\n  </form>\n</div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        192,
+        0
+      ],
+      "id": "5e955125-34c3-41ec-bcac-f8a1b332cf78",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cs-submit",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        176
+      ],
+      "id": "d4f9a074-889d-432d-987e-2ffa6561cc75",
+      "name": "Webhook1",
+      "webhookId": "50fc6433-e198-4c16-8b5f-a21b0207dfba"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b2fd82f9-6c4e-437b-ac72-4094246e9645",
+              "name": "記錄編號",
+              "value": "={{ \"CS-\" + $now.format('yyyyMMddHHmmss') }}",
+              "type": "string"
+            },
+            {
+              "id": "a736a03f-8ed3-44a4-b365-76a55bd4fa26",
+              "name": "提交時間",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm') }}}",
+              "type": "string"
+            },
+            {
+              "id": "96f2705a-6736-4cea-9658-c41cc7b1ad64",
+              "name": "客戶姓名",
+              "value": "={{ $json.body.customerName }}",
+              "type": "string"
+            },
+            {
+              "id": "05bc941f-74c5-47d8-94d7-8647c4e51be2",
+              "name": "客戶Email",
+              "value": "={{ $json.body.customerEmail }}",
+              "type": "string"
+            },
+            {
+              "id": "dbb73df2-238c-4219-a123-48da55a22c2f",
+              "name": "聯絡電話",
+              "value": "={{ $json.body.customerPhone }}",
+              "type": "string"
+            },
+            {
+              "id": "740bf95d-e4c7-47d7-af2a-2168f460c1d1",
+              "name": "訊息內容",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "c93f8a7a-53ab-4e4f-a404-33456c19a1c9",
+              "name": "來源管道",
+              "value": "網頁表單",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        176
+      ],
+      "id": "47e19d46-8dbc-4034-bd97-400b0112d1ee",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch05\\ch5-5\\customer_service.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "客服記錄",
+        "rowData": "={{ JSON.stringify($json) }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        352,
+        176
+      ],
+      "id": "21ff43db-6577-401e-9067-144a89dd774b",
+      "name": "Add row to Excel"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html>\n<html lang=\"zh-TW\">\n<head><meta charset=\"UTF-8\">\n<style>\n  body{font-family:Arial;max-width:480px;margin:80px auto;text-align:center;background:#f0f2f5;}\n  .card{background:white;padding:40px;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,0.1);}\n  h2{color:#27AE60;} p{color:#666;} a{color:#2C3E50;margin-top:20px;display:inline-block;}\n</style></head>\n<body><div class=\"card\">\n  <h2>✅ 已收到您的訊息！</h2>\n  <p>記錄編號：<strong>{{ $('Edit Fields').first().json['記錄編號'] }}</strong></p>\n  <p>我們將於 1-2 個工作天內與您聯繫。</p>\n  <a href=\"/webhook-test/cs-form\">← 返回表單</a>\n</div></body></html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        528,
+        176
+      ],
+      "id": "1db05cc4-f418-44fc-9415-e0e2bfbec55b",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Add row to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add row to Excel": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4ee509dc-2f87-430f-87bb-192568e278aa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "6Mdn5RPcrJc5fYti",
+  "tags": []
+}

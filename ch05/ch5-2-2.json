@@ -1,0 +1,229 @@
+{
+  "name": "ch5-2-2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a2c81ea4-a768-4d5d-8dc9-925de04dc409",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileName": {
+          "__rl": true,
+          "value": "order.xlsx",
+          "mode": "list",
+          "cachedResultName": "order.xlsx"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "訂單",
+          "mode": "list",
+          "cachedResultName": "訂單"
+        }
+      },
+      "type": "n8n-nodes-excel-api.excelApi",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "b07510a1-6385-4c90-b113-efbd446b33e8",
+      "name": "Excel API",
+      "credentials": {
+        "excelApiAuth": {
+          "id": "iiuUZiBFBTFjQPXO",
+          "name": "Excel Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75b98430-6bfa-4ab4-93b3-19ad368e7e31",
+              "name": "查詢出貨日期",
+              "value": "=2026-03-25",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "f3d68ad4-e842-449d-8a37-b7265a1ca734",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "80d509e0-fb99-4df2-b132-30a0a2ef774b",
+              "leftValue": "={{ $json['出貨日期'] }}",
+              "rightValue": "={{ $('Edit Fields').item.json['查詢出貨日期'] }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        0
+      ],
+      "id": "fb88e2d3-f1d7-4e36-a10b-c1b93864032c",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "30249ee0-65f3-4494-bf85-2ab54c010066",
+              "name": "出貨狀態",
+              "value": "尚未出貨",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        0
+      ],
+      "id": "7ffba7b6-0199-4db2-a44f-c558a14e5a7f",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "fileName": {
+          "__rl": true,
+          "value": "shippingList.xlsx",
+          "mode": "list",
+          "cachedResultName": "shippingList.xlsx"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "出貨清單",
+          "mode": "list",
+          "cachedResultName": "出貨清單"
+        },
+        "appendValuesObject": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-api.excelApi",
+      "typeVersion": 1,
+      "position": [
+        816,
+        0
+      ],
+      "id": "597e802b-8446-4781-aa40-f2f25e5943de",
+      "name": "Excel API1",
+      "credentials": {
+        "excelApiAuth": {
+          "id": "iiuUZiBFBTFjQPXO",
+          "name": "Excel Auth account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Excel API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel API": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Excel API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0206a177-f954-48ee-8078-98ec6299bd1b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "PT3gnLs9px5HMP2K",
+  "tags": []
+}

@@ -1,0 +1,158 @@
+{
+  "name": "ch7-1-1",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bde68b4a-1e0d-45cc-9116-96d7f1f4b04e",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cbab0a9e-a1cf-4a05-b10d-410ab6af9688",
+              "name": "path",
+              "value": "C:\\n8n-data\\ch07\\教育訓練成績",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "931eb018-939c-4886-bd57-e8438988f2c3",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $input.first().json.stdout;\nconst files = JSON.parse(stdout);\n\nreturn files.map(f => {\n  // 從 /Date(1657430625154)/ 提取毫秒數\n  const ms = parseInt(f.LastWriteTime.replace(/\\/Date\\((\\d+)\\)\\//, '$1'));\n  const date = new Date(ms);\n\n  return {\n    json: {\n      ...f,\n      LastWriteTime: date.toISOString(),           // 國際標準格式\n      LastWriteTimeLocal: date.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }) // 台灣時間\n    }\n  };\n});;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "id": "0d92fbf6-bbf7-4169-8894-49d331c2c0d0",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a0f4971c-3b7b-49d0-b5a3-0bfb7e4cd67b",
+              "leftValue": "={{ $json.Length }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        640,
+        0
+      ],
+      "id": "4c36f026-ff9d-41fa-b847-0a45df3a2523",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "command": "=powershell -Command \"& {[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; Get-ChildItem -Path '{{ $json.path }}' | Select-Object Name, FullName, Length, LastWriteTime, Extension | ConvertTo-Json}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "6d1739ef-ecb6-4396-add5-efb4af5dab64",
+      "name": "Execute Command-list_files"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute Command-list_files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command-list_files": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7288dc25-008a-44d3-abe7-1fd16a46995c",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "Z1UI6ZSv7YwvXzWv",
+  "tags": []
+}

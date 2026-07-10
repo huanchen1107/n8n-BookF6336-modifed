@@ -1,0 +1,1 @@
+請幫我建立n8n Code節點的JS程式碼，可以取出20筆RSS的前3筆，並且只取出isoDate、title、link和contentSnippet幾個欄位。

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>n8n 節點資料與三種檢視方式</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange: #ff6d5a;
+  --orange-dark: #e05545;
+  --orange-glow: rgba(255,109,90,0.15);
+  --bg: #0f0f13;
+  --bg2: #16161d;
+  --bg3: #1e1e28;
+  --bg4: #252533;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8e8f0;
+  --text2: #9898b0;
+  --text3: #5a5a72;
+  --green: #6be99b;
+  --blue: #60b8ff;
+  --purple: #c084fc;
+  --yellow: #fbbf24;
+  --pink: #f472b6;
+  --cyan: #22d3ee;
+  --red: #f87171;
+  --teal: #2dd4bf;
+  --code-bg: #0a0a0f;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  width: 36px; height: 36px;
+  background: var(--orange);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+header h1 {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+header h1 span { color: var(--orange); }
+
+header p {
+  font-size: 13px;
+  color: var(--text2);
+  margin-left: auto;
+  text-align: right;
+}
+
+/* ── Page body ── */
+.container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+/* ── Flow diagram ── */
+.flow-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px 16px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.flow-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 560px;
+  justify-content: center;
+}
+
+.node-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 162px;
+  height: 66px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border2);
+  cursor: pointer;
+  transition: all .18s ease;
+  text-align: center;
+  padding: 0 12px;
+  outline: none;
+  background: var(--bg3);
+  font-family: 'Sora', sans-serif;
+}
+
+.node-btn:hover { transform: translateY(-2px); border-color: var(--border2); background: var(--bg4); }
+
+.node-btn.trigger       { border-color: rgba(96,184,255,0.35); }
+.node-btn.trigger.active { background: rgba(96,184,255,0.08); border-color: var(--blue); box-shadow: 0 0 0 3px rgba(96,184,255,0.12); }
+
+.node-btn.http       { border-color: rgba(45,212,191,0.35); }
+.node-btn.http.active { background: rgba(45,212,191,0.08); border-color: var(--teal); box-shadow: 0 0 0 3px rgba(45,212,191,0.12); }
+
+.node-btn.set       { border-color: rgba(192,132,252,0.35); }
+.node-btn.set.active { background: rgba(192,132,252,0.08); border-color: var(--purple); box-shadow: 0 0 0 3px rgba(192,132,252,0.12); }
+
+.node-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.node-btn.trigger .node-name { color: var(--blue); }
+.node-btn.http .node-name    { color: var(--teal); }
+.node-btn.set .node-name     { color: var(--purple); }
+
+.node-desc { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+.connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0 10px;
+}
+.connector-label { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+.connector-arrow { font-size: 18px; color: var(--text3); line-height: 1; }
+
+.flow-hint {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 14px;
+  letter-spacing: 0.03em;
+}
+
+/* ── Data panel ── */
+.data-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.panel-node-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 120px;
+}
+
+.tab-group { display: flex; gap: 6px; }
+
+.tab-btn {
+  padding: 5px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  color: var(--text2);
+  transition: all .15s;
+}
+.tab-btn:hover { border-color: var(--orange); color: var(--orange); }
+.tab-btn.active {
+  background: var(--orange-glow);
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.items-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--cyan);
+  background: rgba(34,211,238,0.08);
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(34,211,238,0.2);
+}
+
+.panel-body { padding: 16px 18px; }
+
+/* View panels */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── Schema ── */
+.schema-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.schema-row:last-child { border-bottom: none; }
+
+.schema-key {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  color: var(--purple);
+  min-width: 140px;
+  font-weight: 500;
+}
+
+.type-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.t-string  { background: rgba(107,233,155,0.1); color: var(--green);  border-color: rgba(107,233,155,0.25); }
+.t-number  { background: rgba(96,184,255,0.1);  color: var(--blue);   border-color: rgba(96,184,255,0.25); }
+.t-boolean { background: rgba(192,132,252,0.1); color: var(--purple); border-color: rgba(192,132,252,0.25); }
+.t-object  { background: rgba(45,212,191,0.1);  color: var(--teal);   border-color: rgba(45,212,191,0.25); }
+.t-array   { background: rgba(251,191,36,0.1);  color: var(--yellow); border-color: rgba(251,191,36,0.25); }
+
+.schema-desc { color: var(--text2); font-size: 12.5px; }
+
+/* ── Table ── */
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+thead th {
+  background: var(--bg3);
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--bg3); }
+
+.table-note {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── JSON ── */
+.json-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.85;
+  white-space: pre;
+  color: var(--text2);
+}
+.jk { color: var(--purple); }
+.js { color: var(--green); }
+.jn { color: var(--blue); }
+.jb { color: var(--yellow); }
+.jl { color: var(--red); }
+
+/* ── Tip box ── */
+.tip-box {
+  margin-top: 14px;
+  background: var(--bg3);
+  border-left: 3px solid var(--border2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+.tip-box strong { color: var(--text); }
+.tip-hl { display: block; margin-top: 5px; font-size: 12px; font-weight: 600; }
+
+/* ── Expression ref ── */
+.expr-section {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px; height: 14px;
+  background: var(--orange);
+  border-radius: 2px;
+}
+
+.expr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 540px) { .expr-grid { grid-template-columns: 1fr; } }
+
+.expr-card {
+  background: var(--bg3);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+
+.expr-card-label {
+  font-size: 11px;
+  color: var(--text3);
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  display: block;
+  margin: 4px 0;
+  line-height: 1.6;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: var(--code-bg);
+}
+
+code.blue   { color: var(--blue); }
+code.teal   { color: var(--teal); }
+
+.expr-hint {
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 10px;
+  padding: 9px 13px;
+  background: var(--bg3);
+  border-radius: var(--radius);
+  line-height: 1.65;
+}
+
+.expr-hint .kw {
+  background: rgba(251,191,36,0.12);
+  color: var(--yellow);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* ── Action buttons ── */
+.action-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.action-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  color: var(--text2);
+  transition: all .15s;
+}
+.action-btn:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-glow); }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡</div>
+  <h1>JSON 說明：n8n <span>節點資料</span>與三種檢視方式</h1>
+  <p>Schema · Table · JSON<br>同一份資料，三種觀看角度</p>
+</header>
+
+<div class="container">
+
+  <!-- Flow diagram -->
+  <div class="flow-wrap">
+    <div class="flow-row">
+      <button class="node-btn trigger active" onclick="selectNode('trigger')" id="node-trigger" aria-label="選擇 Webhook 觸發節點">
+        <div class="node-name">Webhook 觸發</div>
+        <div class="node-desc">接收 HTTP 請求</div>
+      </button>
+
+      <div class="connector">
+        <div class="connector-label">items[]</div>
+        <div class="connector-arrow">→</div>
+      </div>
+
+      <button class="node-btn http" onclick="selectNode('http')" id="node-http" aria-label="選擇 HTTP Request 節點">
+        <div class="node-name">HTTP Request</div>
+        <div class="node-desc">呼叫外部 API</div>
+      </button>
+
+      <div class="connector">
+        <div class="connector-label">items[]</div>
+        <div class="connector-arrow">→</div>
+      </div>
+
+      <button class="node-btn set" onclick="selectNode('set')" id="node-set" aria-label="選擇 Edit Fields 節點">
+        <div class="node-name">Edit Fields</div>
+        <div class="node-desc">整理輸出欄位</div>
+      </button>
+    </div>
+    <div class="flow-hint">← 點擊任一節點，查看它輸出的資料結構 →</div>
+  </div>
+
+  <!-- Data panel -->
+  <div class="data-panel">
+    <div class="panel-header">
+      <div class="panel-node-label" id="panel-node-label">Webhook 觸發 的輸出</div>
+      <div class="tab-group">
+        <button class="tab-btn active" onclick="switchTab('schema', this)">Schema</button>
+        <button class="tab-btn"        onclick="switchTab('table',  this)">Table</button>
+        <button class="tab-btn"        onclick="switchTab('json',   this)">JSON</button>
+      </div>
+      <div class="items-badge" id="items-badge">items[0]</div>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- Schema view -->
+      <div class="view active" id="view-schema">
+        <div id="schema-content"></div>
+        <div class="tip-box" style="border-left-color: var(--text3);">
+          <strong>Schema 是什麼？</strong><br>
+          顯示每個欄位的<strong>名稱 + 資料型別</strong>，不顯示實際值。像是資料的「目錄」，一眼看懂這個節點輸出哪些欄位、是字串還是數字。
+          <span class="tip-hl" style="color:var(--blue);">最適合：快速確認欄位是否存在、型別是否正確。</span>
+        </div>
+      </div>
+
+      <!-- Table view -->
+      <div class="view" id="view-table">
+        <div class="table-wrap" id="table-content"></div>
+        <div class="tip-box" style="border-left-color: var(--teal);">
+          <strong>Table 是什麼？</strong><br>
+          把 JSON 攤平成試算表格式，每一列是一筆 item，每一欄是一個欄位。有多筆資料時很容易<strong>比較差異</strong>。
+          <span class="tip-hl" style="color:var(--teal);">最適合：確認批次資料、快速掃描多筆結果。</span>
+        </div>
+      </div>
+
+      <!-- JSON view -->
+      <div class="view" id="view-json">
+        <div class="json-block" id="json-content"></div>
+        <div class="tip-box" style="border-left-color: var(--blue);">
+          <strong>JSON 是什麼？</strong><br>
+          顯示節點輸出的完整原始結構，包含巢狀物件與陣列。用 <code style="display:inline;background:rgba(96,184,255,0.1);color:var(--blue);padding:1px 6px;border-radius:4px;font-size:11.5px;">{{ $json["欄位名"] }}</code> 就能在下一個節點引用任何值。
+          <span class="tip-hl" style="color:var(--purple);">最適合：撰寫 expression、除錯、確認巢狀結構。</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Expression reference -->
+  <div class="expr-section">
+    <div class="section-title">如何在下一個節點引用資料？</div>
+    <div class="expr-grid">
+      <div class="expr-card">
+        <div class="expr-card-label">取得當前 item 的欄位</div>
+        <code class="blue">{{ $json["name"] }}</code>
+        <code class="blue">{{ $json["user"]["email"] }}</code>
+      </div>
+      <div class="expr-card">
+        <div class="expr-card-label">取得指定節點的輸出</div>
+        <code class="teal">{{ $node["HTTP Request"].json["id"] }}</code>
+        <code class="teal">{{ $items("Edit Fields")[0].json["status"] }}</code>
+      </div>
+    </div>
+    <div class="expr-hint">
+      提示：在任何欄位輸入 <span class="kw">{{</span> 就會開啟 expression 編輯器，可以直接點選 Schema 中的欄位自動填入路徑。
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="action-row">
+    <button class="action-btn" onclick="openLink('https://docs.n8n.io/code/expressions/')">Expression 語法詳解 ↗</button>
+    <button class="action-btn" onclick="openLink('https://docs.n8n.io/data/data-structure/')">為什麼資料是 items 陣列？↗</button>
+    <button class="action-btn" onclick="openLink('https://docs.n8n.io/flow-logic/error-handling/')">測試除錯技巧 ↗</button>
+  </div>
+
+</div>
+
+<script>
+const NODES = {
+  trigger: {
+    label: 'Webhook 觸發 的輸出',
+    badge: 'items[0]',
+    schema: [
+      { key: 'headers',      type: 'Object',  desc: 'HTTP 請求標頭' },
+      { key: 'body',         type: 'Object',  desc: '請求內容（主體）' },
+      { key: 'body.name',    type: 'String',  desc: '使用者傳入的名稱' },
+      { key: 'body.email',   type: 'String',  desc: '使用者傳入的信箱' },
+      { key: 'query',        type: 'Object',  desc: 'URL 查詢參數' },
+    ],
+    table: {
+      cols: ['headers.content-type', 'body.name', 'body.email', 'query.page'],
+      rows: [['application/json', '王小明', 'ming@example.com', '1']]
+    },
+    jsonRaw: `[
+  {
+    "json": {
+      "headers": {
+        "content-type": "application/json"
+      },
+      "body": {
+        "name": "王小明",
+        "email": "ming@example.com"
+      },
+      "query": {
+        "page": "1"
+      }
+    }
+  }
+]`
+  },
+  http: {
+    label: 'HTTP Request 的輸出',
+    badge: 'items[0..1]',
+    schema: [
+      { key: 'id',        type: 'Number',  desc: '使用者 ID' },
+      { key: 'name',      type: 'String',  desc: '使用者名稱' },
+      { key: 'email',     type: 'String',  desc: '電子信箱' },
+      { key: 'status',    type: 'String',  desc: '帳號狀態' },
+      { key: 'createdAt', type: 'String',  desc: '建立時間（ISO 格式）' },
+    ],
+    table: {
+      cols: ['id', 'name', 'email', 'status', 'createdAt'],
+      rows: [
+        [1001, '王小明', 'ming@example.com', 'active',   '2024-03-01'],
+        [1002, '李小華', 'hua@example.com',  'inactive', '2024-03-15'],
+      ]
+    },
+    jsonRaw: `[
+  {
+    "json": {
+      "id": 1001,
+      "name": "王小明",
+      "email": "ming@example.com",
+      "status": "active",
+      "createdAt": "2024-03-01T08:00:00Z"
+    }
+  },
+  {
+    "json": {
+      "id": 1002,
+      "name": "李小華",
+      "email": "hua@example.com",
+      "status": "inactive",
+      "createdAt": "2024-03-15T10:30:00Z"
+    }
+  }
+]`
+  },
+  set: {
+    label: 'Edit Fields 節點 的輸出',
+    badge: 'items[0..1]',
+    schema: [
+      { key: 'userId',      type: 'Number',  desc: '整理後的使用者 ID' },
+      { key: 'displayName', type: 'String',  desc: '顯示名稱' },
+      { key: 'isActive',    type: 'Boolean', desc: '是否啟用' },
+    ],
+    table: {
+      cols: ['userId', 'displayName', 'isActive'],
+      rows: [
+        [1001, '王小明', 'true'],
+        [1002, '李小華', 'false'],
+      ]
+    },
+    jsonRaw: `[
+  {
+    "json": {
+      "userId": 1001,
+      "displayName": "王小明",
+      "isActive": true
+    }
+  },
+  {
+    "json": {
+      "userId": 1002,
+      "displayName": "李小華",
+      "isActive": false
+    }
+  }
+]`
+  }
+};
+
+const TYPE_CLASS = {
+  String: 't-string', Number: 't-number', Boolean: 't-boolean',
+  Object: 't-object', Array: 't-array'
+};
+
+let currentNode = 'trigger';
+
+function selectNode(id) {
+  currentNode = id;
+  const data = NODES[id];
+  ['trigger', 'http', 'set'].forEach(k => {
+    document.getElementById('node-' + k).classList.toggle('active', k === id);
+  });
+  document.getElementById('panel-node-label').textContent = data.label;
+  document.getElementById('items-badge').textContent = data.badge;
+  renderSchema();
+  renderTable();
+  renderJson();
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+}
+
+function renderSchema() {
+  const rows = NODES[currentNode].schema;
+  let html = '';
+  rows.forEach(r => {
+    const cls = TYPE_CLASS[r.type] || 't-string';
+    html += `<div class="schema-row">
+      <span class="schema-key">${r.key}</span>
+      <span class="type-badge ${cls}">${r.type}</span>
+      <span class="schema-desc">${r.desc}</span>
+    </div>`;
+  });
+  document.getElementById('schema-content').innerHTML = html;
+}
+
+function renderTable() {
+  const t = NODES[currentNode].table;
+  let html = '<table><thead><tr>';
+  t.cols.forEach(c => html += `<th>${c}</th>`);
+  html += '</tr></thead><tbody>';
+  t.rows.forEach(row => {
+    html += '<tr>';
+    row.forEach(cell => html += `<td>${cell}</td>`);
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  if (t.rows.length > 1) {
+    html += `<p class="table-note">共 ${t.rows.length} 筆 items，每列對應一個 item。</p>`;
+  }
+  document.getElementById('table-content').innerHTML = html;
+}
+
+function colorizeJson(raw) {
+  return raw
+    .replace(/("(?:[^"\\]|\\.)*")\s*:/g, '<span class="jk">$1</span>:')
+    .replace(/:\s*("(?:[^"\\]|\\.)*")/g, ': <span class="js">$1</span>')
+    .replace(/:\s*(-?\d+(?:\.\d+)?)\b/g, ': <span class="jn">$1</span>')
+    .replace(/:\s*(true|false)\b/g, ': <span class="jb">$1</span>')
+    .replace(/:\s*(null)\b/g, ': <span class="jl">$1</span>');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderJson() {
+  const raw = NODES[currentNode].jsonRaw || '[]';
+  document.getElementById('json-content').innerHTML = colorizeJson(escHtml(raw));
+}
+
+function openLink(url) { window.open(url, '_blank', 'noopener'); }
+
+renderSchema();
+renderTable();
+renderJson();
+</script>
+</body>
+</html>

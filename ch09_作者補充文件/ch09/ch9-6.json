@@ -1,0 +1,257 @@
+{
+  "name": "ch9-6",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -32
+      ],
+      "id": "07b6be68-7d78-4f06-a124-09e0d78bb1c0",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "=markitdown \"{{ $json.inputPath }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -128
+      ],
+      "id": "c98730fb-f369-49c9-8c79-a2406dc43f87",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "command": "=python \"C:\\n8n-data\\ch09\\convert_to_md.py\" \"{{ $json.inputPath }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        352,
+        48
+      ],
+      "id": "076ef257-0ea6-4aeb-b8bf-bb06dc81445a",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "stdout",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        -128
+      ],
+      "id": "30ea0f41-3b03-476c-900b-44042310c4b7",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3b0aea89-f985-41cf-9d58-280616689d0f",
+              "name": "inputPath",
+              "value": "=C:\\n8n-data\\ch09\\員工資料.xlsx",
+              "type": "string"
+            },
+            {
+              "id": "25d76f12-e742-4625-b10c-8f7c0c1ece21",
+              "name": "outputPath",
+              "value": "C:\\n8n-data\\ch09\\員工資料.md",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        -128
+      ],
+      "id": "c290e7f8-795d-4a0d-bcef-8295379514fc",
+      "name": "Edit Fields - XLSX"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Edit Fields - XLSX').item.json.outputPath }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        -128
+      ],
+      "id": "05229a4a-7c97-4293-b541-8ff1640e18a2",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3b0aea89-f985-41cf-9d58-280616689d0f",
+              "name": "inputPath",
+              "value": "=C:\\n8n-data\\ch09\\補貨報表_20260323.pdf",
+              "type": "string"
+            },
+            {
+              "id": "00e5d0c4-cae1-4cfa-b98f-0a85c796ed4e",
+              "name": "outputPath",
+              "value": "C:\\n8n-data\\ch09\\補貨報表_20260323.md",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        48
+      ],
+      "id": "1e8a099a-8abe-4c1e-b8bc-0ec4b4f06b5b",
+      "name": "Edit Fields - PDF"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "stdout",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        48
+      ],
+      "id": "619259fd-4924-4d2b-9f92-d0758676e5e6",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('Edit Fields - PDF').item.json.outputPath }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        48
+      ],
+      "id": "3fb472e1-63ab-4bea-a31d-3455d03900ab",
+      "name": "Read/Write Files from Disk1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - XLSX",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields - PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - XLSX": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - PDF": {
+      "main": [
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "59d9a96d-d17f-4af1-83fe-bd8793f0f957",
+  "meta": {
+    "instanceId": "f5773e5d36e8a9a13d38de349e82c291ec43aee8ae98e4945d58baf34ebcdd7e"
+  },
+  "id": "MB5XGDNgz8f2Fr8J",
+  "tags": []
+}

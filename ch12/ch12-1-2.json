@@ -1,0 +1,129 @@
+{
+  "name": "ch12-1-2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "linebot",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "0daca8e2-417f-4ef6-9ace-cd76edb2524b",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        0
+      ],
+      "webhookId": "53029828-7191-49f5-91dc-0f9621290e92"
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst channelSecret = '<Channel Secret>';\n\n// 1. 從 Header 取得 LINE 簽章\nconst signature = $input.item.json.headers['x-line-signature'];\n\n// 2. 從 Binary 取得原始內容 (關鍵修正)\n// n8n 的 Binary 資料需要透過 getBinaryDataBuffer 轉換為 Node.js 的 Buffer\nconst binaryData = $input.item.binary.data; // 假設 Webhook 產出的 Binary 欄位名稱是 data\n\nif (!binaryData) {\n    throw new Error('找不到 Binary Data，請確認 Webhook 的 \"Response Binary Property\" 設定為 data');\n}\n\n// 將 n8n 的內部格式轉為 Buffer\nconst bodyBuffer = await this.helpers.getBinaryDataBuffer(0, 'data');\n\n// 3. 計算 HMAC (直接傳入 Buffer 運算最準確)\nconst hash = crypto\n  .createHmac('sha256', channelSecret)\n  .update(bodyBuffer)\n  .digest('base64');\n\n// 4. 比對簽章\nif (hash !== signature) {\n  // 教學調試用：如果失敗，輸出兩者比對，方便您在書中截圖說明\n  throw new Error(`Invalid signature! \\nLINE sent: ${signature} \\nGenerated: ${hash}`);\n}\n\n// 5. 驗證通過\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        0
+      ],
+      "id": "32ecad4e-10bf-4cea-beba-2284440b29e7",
+      "name": "驗證LINE Signature"
+    },
+    {
+      "parameters": {
+        "jsCode": "const events = $input.first().json.body?.events ?? [];\nif (!events.length) return [{ json: { skip: true } }];\nconst e = events[0];\nreturn [{ json: { replyToken: e.replyToken, messageText: e.message?.text ?? '非文字訊息', userId: e.source?.userId, replyMessage: '已收到：' + (e.message?.text ?? '非文字訊息') } }];"
+      },
+      "id": "8b59e2ab-996c-42e4-aa95-78dd7c752be4",
+      "name": "LINE訊息解析器",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        288,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer <Channel Access Token>"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $json.replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"{{ $json.replyMessage }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "18705ec9-b6bf-470b-8514-5a3a12c1dec6",
+      "name": "回應LINE訊息",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        448,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "驗證LINE Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "驗證LINE Signature": {
+      "main": [
+        [
+          {
+            "node": "LINE訊息解析器",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LINE訊息解析器": {
+      "main": [
+        [
+          {
+            "node": "回應LINE訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "60d281d0-cca5-4701-95b7-3c84fa04031c",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "3R87npu48hkCg0pT",
+  "tags": []
+}

@@ -1,0 +1,218 @@
+{
+  "name": "ch7-2-1b",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        96
+      ],
+      "id": "96e38394-e359-4a34-a9c2-41cbaa2b02fc",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d2e2ee9e-101b-4227-a8b4-f57a5595357c",
+              "name": "sourcePath",
+              "value": "C:\\n8n-data\\ch07\\sales",
+              "type": "string"
+            },
+            {
+              "id": "e72c2c90-521c-4ed9-a827-875f26fa7ba9",
+              "name": "fileName",
+              "value": "stock.xlsx",
+              "type": "string"
+            },
+            {
+              "id": "05dfcc96-621f-484c-99a4-abce0499ee8a",
+              "name": "outputPath",
+              "value": "C:\\n8n-data\\ch07\\sales\\Output",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -512,
+        96
+      ],
+      "id": "39560245-cb01-475d-b391-18860bce8fef",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a6cc7ffb-e90d-4c67-852a-e7bef188534d",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        96
+      ],
+      "id": "c643bf99-a637-4c27-acca-49cea0c70dd1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    message: \"檔案 stock.xlsx 不存在！\"\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        192
+      ],
+      "id": "955e032b-89a6-4c35-aaeb-1bd8bf94741c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "exists",
+        "targetPath": "={{ $json.sourcePath + '\\\\' + $json.fileName }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        96
+      ],
+      "id": "701ddfa2-46fa-47b1-84a1-2b5b089ae93b",
+      "name": "File Manager AI"
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "sourcePath": "={{ $('Edit Fields').item.json.sourcePath +'\\\\'+ $('Edit Fields').item.json.fileName }}",
+        "destinationPath": "={{ $('Edit Fields').item.json.outputPath + '\\\\' + $('Edit Fields').item.json.fileName }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3185f350-4f79-4a55-a1ad-ad6107d17d81",
+      "name": "File Manager AI1"
+    },
+    {
+      "parameters": {
+        "operation": "remove",
+        "sourcePath": "={{ $('Edit Fields').item.json.sourcePath + '\\\\' + $('Edit Fields').item.json.fileName }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        160,
+        0
+      ],
+      "id": "146f5a31-b831-46c6-9b68-42c1f8d1f9b4",
+      "name": "File Manager AI2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Manager AI": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Manager AI1": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "75b42c1d-c99b-470e-9d04-7b77227dec33",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "PFvfhYqtwGvLkAQL",
+  "tags": []
+}

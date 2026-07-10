@@ -1,0 +1,58 @@
+以下是根據您上傳的 HTML 分析出的完整提示詞，可直接複製貼上使用：
+
+---
+
+請幫我建立一個使用 n8n Webhook 的 HTML 單頁網頁工具，規格如下：
+
+**整體樣式**
+網頁使用白色卡片置中佈局，背景為紫藍色漸層（#667eea 到 #764ba2），卡片有圓角與陰影。頂部有深色漸層標題區塊，內文區域有足夠的內距。按鈕為圓角膠囊型，顏色與背景漸層一致，hover 時有上移與陰影效果。字型使用 Microsoft JhengHei。整體為繁體中文介面。
+
+---
+
+**Webhook 設定**
+
+- 請求方式：POST
+- Webhook URL：`http://localhost:5678/webhook/ai-summary`（請在程式碼中以常數 `WEBHOOK_URL` 定義，方便日後修改）
+- 請求 Header：`Content-Type: application/json`
+- 請求 Body（JSON 格式）：
+```json
+{
+  "article": "使用者輸入的文章內容"
+}
+```
+
+- Webhook 回應格式（JSON）：
+```json
+{
+  "success": true,
+  "summary": "AI 產生的摘要文字內容"
+}
+```
+
+當 `success` 為 `true` 時，將 `summary` 欄位的文字顯示在結果區塊。若 `success` 為 `false` 或請求失敗，顯示錯誤訊息。
+
+---
+
+**頁面元素與功能**
+
+1. 頁首區塊：顯示標題「🤖 AI 文章摘要工具」與說明文字「輸入您的文章，讓 AI 幫您快速產生重點摘要」
+
+2. 文字輸入區：多行文字輸入框（textarea），id 為 `articleInput`，placeholder 提示使用者貼上文章，最小高度 200px，可垂直拖曳調整高度，focus 時邊框變色
+
+3. 送出按鈕：id 為 `submitBtn`，文字為「✨ 生成摘要」，送出時停用按鈕避免重複點擊，請求結束後恢復
+
+4. 輸入驗證：
+   - 若輸入為空，顯示錯誤「請輸入文章內容！」
+   - 若輸入字元數少於 50，顯示錯誤「文章內容太短，請輸入至少 50 個字元！」
+
+5. 載入動畫：id 為 `loading`，顯示旋轉圓形 spinner 與文字「AI 正在分析文章中，請稍候...」，預設隱藏，送出後顯示，收到回應後隱藏
+
+6. 錯誤訊息區塊：id 為 `errorMessage`，背景淡紅色，左側有紅色邊線，預設隱藏，發生錯誤時顯示，再次送出時自動隱藏
+
+7. 結果顯示區塊：id 為 `resultSection`，預設隱藏，成功收到回應後以淡入動畫顯示；內部有標題「📌 摘要結果」與結果容器 id `summaryResult`，結果容器左側有紫色邊線，使用 `white-space: pre-wrap` 保留換行格式
+
+8. 鍵盤快捷鍵：在 textarea 中按下 Ctrl + Enter 觸發送出，單獨按 Enter 不送出
+
+---
+
+請將上述所有 HTML、CSS、JavaScript 整合輸出為單一 .html 檔案，不需引用任何外部 CSS 框架或 JS 函式庫。

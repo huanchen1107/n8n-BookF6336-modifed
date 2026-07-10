@@ -1,0 +1,83 @@
+{
+  "name": "ch7-2-1a",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b3e0a24b-f8b2-440c-89b8-4c0eaf5c13ab",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "sourcePath": "C:\\n8n-data\\ch07\\sales\\Output",
+        "createType": "folder"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        160,
+        0
+      ],
+      "id": "a726cdf4-005e-434e-b5ce-5f4085238c53",
+      "name": "File Manager AI"
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "sourcePath": "C:\\n8n-data\\ch07\\sales\\業績資料.xlsx",
+        "destinationPath": "C:\\n8n-data\\ch07\\sales\\Output\\公司業績資料.xlsx"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "986bdc10-5c62-4f15-8c26-a2c87575fc36",
+      "name": "File Manager AI1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Manager AI": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "cb6eb1d4-2ae0-48a0-b9ed-fc3fe8c43d3b",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "SMnGpAzmR5rO8hmf",
+  "tags": []
+}

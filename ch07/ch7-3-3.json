@@ -1,0 +1,95 @@
+{
+  "name": "ch7-3-3",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "714a652b-0350-4562-8abc-5e4ad11f0fa3",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af531b7f-f797-45f1-a1c9-ea57d6568d69",
+              "name": "sourcePath",
+              "value": "C:\\n8n-data\\ch07\\n8n_vibe_coding_prompts.md",
+              "type": "string"
+            },
+            {
+              "id": "3833b561-3dbe-435b-9063-b9da21ec8efd",
+              "name": "outputPath",
+              "value": "C:\\n8n-data\\ch07\\output.html",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "508628bb-06b8-4e1c-9379-92eb7e8540f0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "command": "=C:\\n8n-data\\tools\\tools\\pandoc\\pandoc \"{{ $json.sourcePath }}\" -o \"{{ $json.outputPath }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "33af4601-f250-4e91-b3af-7dc72d15f74a",
+      "name": "Execute Command_MD2HTML"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute Command_MD2HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5c03f34f-8243-4b46-8eb0-fa81e1614fda",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "bNKlIRj0nH1AYflZ",
+  "tags": []
+}

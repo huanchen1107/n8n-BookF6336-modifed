@@ -1,0 +1,95 @@
+{
+  "name": "ch7-3-3a",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "724fa0f0-bc9c-4f1f-aa09-be687749cd98",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af531b7f-f797-45f1-a1c9-ea57d6568d69",
+              "name": "sourcePath",
+              "value": "C:\\n8n-data\\ch07\\webhook-form-html.html",
+              "type": "string"
+            },
+            {
+              "id": "be8b587a-b9d1-444e-a6cd-53ec4001186f",
+              "name": "outputPath",
+              "value": "C:\\n8n-data\\ch07\\output.pdf",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "e54df813-6efd-43b0-8d32-5031dc2c1c3c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "command": "=C:\\n8n-data\\tools\\tools\\wkhtmltox\\bin\\wkhtmltopdf \"{{ $json.sourcePath }}\" \"{{ $json.outputPath }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "3827405b-c2a3-42e8-bf3e-94b9ee22422f",
+      "name": "Execute Command_HTML2PDF"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute Command_HTML2PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b2fa573c-d6d3-4fcf-870a-ac02da3cc64c",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "RUaEn7oeyVQ3N0kO",
+  "tags": []
+}

@@ -1,0 +1,265 @@
+{
+  "name": "ch6-2-3",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "customEmailConfig": "[\"UNSEEN\"]"
+        }
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f8c40292-fd47-403d-87b2-0c98cb2a2363",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "kYIwep4jWGWaKlVt",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6d974fd2-ebc0-4ec8-b149-89a9b01fafc2",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "報名",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "979e78eb-dcd9-410f-a01c-7e930f36fcb1",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "諮詢",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        0
+      ],
+      "id": "08ede480-9480-44fa-a0a8-247d03c46321",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b665a339-2e20-4806-8e4b-b72abca15a15",
+              "leftValue": "={{ $('Email Trigger (IMAP)').item.json.from }}",
+              "rightValue": "hueyanchen2020@gmail.com",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        0
+      ],
+      "id": "2098b3b5-2a35-4a43-a87a-08356998f825",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hueyanchen2020@gmail.com",
+        "toEmail": "={{ $json[\"from\"].match(/<(.+)>/)[1] }}",
+        "subject": "回覆課程詢問",
+        "html": "=您好 {{ $json[\"from\"].replace(/<.*>/, \"\").trim() }}，\n\n\n我們已收到您的郵件「{{ $json[\"subject\"] }}」，將會盡快處理。\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "96cbc87e-a68f-4839-9f63-485c741e3b63",
+      "name": "Send an Email",
+      "webhookId": "0a8436ef-bc71-48de-8842-24a581f12688",
+      "credentials": {
+        "smtp": {
+          "id": "UM06ssDnTxzoirMQ",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "57c4b49c-bd5d-43ca-9731-93a4c8e669c1",
+              "name": "收件時間",
+              "value": "={{ new Date($('Filter1').item.json.date).toLocaleString(\"zh-TW\", { year: \"numeric\", month: \"2-digit\", day: \"2-digit\", hour: \"2-digit\", minute: \"2-digit\", second: \"2-digit\", hour12: false }).replace(/\\//g, \"/\") }}",
+              "type": "string"
+            },
+            {
+              "id": "0c00e30a-e6df-4eaa-b25d-e19bfd39764b",
+              "name": "寄件者姓名",
+              "value": "={{ $('Filter1').item.json.from.replace(/<.*>/, \"\").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "d147c137-7926-4af7-8a96-aa26c0e813c9",
+              "name": "寄件者Email",
+              "value": "={{ $('Filter1').item.json.from.match(/<(.+)>/)[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "6ce40b52-8233-450e-84c2-d250567f4130",
+              "name": "主旨",
+              "value": "={{ $('Filter1').item.json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "7e1a2b34-c79a-45af-9dd9-5bcc80f4c066",
+              "name": "=郵件內容摘要",
+              "value": "={{ $('Filter1').item.json.textPlain.slice(0, 200) }}",
+              "type": "string"
+            },
+            {
+              "id": "f40242ac-a241-4a2f-a5cc-add16523994c",
+              "name": "處理狀態",
+              "value": "待處理",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        0
+      ],
+      "id": "dff19825-778c-44a6-bcb6-c1d8c2fb0f09",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch06\\課程詢問郵件記錄.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "課程詢問郵件記錄",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        784,
+        0
+      ],
+      "id": "2a1e0b5d-e938-4b17-b00d-8ce8671c4f2a",
+      "name": "Add row to Excel"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Add row to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an Email": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "3600ca15-6f92-46f8-9f32-6b2c537adad8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "4yfWjrEfXTMGRG3i",
+  "tags": []
+}

@@ -1,0 +1,5 @@
+當執行你給的程式碼時出現以下錯誤：
+ERROR: Cannot read properties of undefined (reading '部門')
+
+請分析原因並修正程式碼。
+

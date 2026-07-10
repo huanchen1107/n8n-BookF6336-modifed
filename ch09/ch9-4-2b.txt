@@ -1,0 +1,8 @@
+請為 n8n Code 節點 (JavaScript) 寫扁平化程式碼。
+輸入：$input.all() 包含巢狀結構
+資料範例：
+[輸入巢狀 JSON]
+需求：
+- 將巢狀結構扁平化成單層 JSON
+- 欄位命名規則：[例如：使用底線連接，user.name → user_name]
+- 返回格式：return items.map(item => ({json: {...}}))

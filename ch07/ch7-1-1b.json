@@ -1,0 +1,213 @@
+{
+  "name": "ch7-1-1b",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        96
+      ],
+      "id": "ab532379-f2b8-4953-882a-415a5ba40a68",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d2e2ee9e-101b-4227-a8b4-f57a5595357c",
+              "name": "sourcePath",
+              "value": "C:\\n8n-data\\ch07\\sales",
+              "type": "string"
+            },
+            {
+              "id": "e72c2c90-521c-4ed9-a827-875f26fa7ba9",
+              "name": "fileName",
+              "value": "stock.xlsx",
+              "type": "string"
+            },
+            {
+              "id": "05dfcc96-621f-484c-99a4-abce0499ee8a",
+              "name": "outputPath",
+              "value": "C:\\n8n-data\\ch07\\sales\\Output",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -496,
+        96
+      ],
+      "id": "dbb419f6-3254-4669-b956-276539962ad3",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "command": "=cmd /c if exist \"{{ $json.sourcePath + '\\\\' + $json.fileName }}\" (echo true) else (echo false)"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        96
+      ],
+      "id": "5f367fd5-b5fd-4875-9e56-d44385ea2201",
+      "name": "Execute Command-file_exists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a6cc7ffb-e90d-4c67-852a-e7bef188534d",
+              "leftValue": "={{ $json.stdout.trim() }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -176,
+        96
+      ],
+      "id": "23eba0ce-3899-4a31-ae5e-8ecdf4a956b5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "command": "=cmd /c copy \"{{ $('Edit Fields').item.json.sourcePath +'\\\\'+ $('Edit Fields').item.json.fileName }}\" \"{{ $('Edit Fields').item.json.outputPath + '\\\\' + $('Edit Fields').item.json.fileName }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        16,
+        0
+      ],
+      "id": "6a113ad8-7222-4c94-8ba4-0d43421c4725",
+      "name": "Execute Command-copy_file"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    message: \"檔案 stock.xlsx 不存在！\"\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        192
+      ],
+      "id": "2964e81d-4104-42f9-b813-8a61392465dc",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "command": "=cmd /c del \"{{ $('Edit Fields').item.json.sourcePath + '\\\\' + $('Edit Fields').item.json.fileName }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        192,
+        0
+      ],
+      "id": "6b7d431b-c451-42bc-991b-74bfdca946bc",
+      "name": "Execute Command-delete_file"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute Command-file_exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command-file_exists": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Execute Command-copy_file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command-copy_file": {
+      "main": [
+        [
+          {
+            "node": "Execute Command-delete_file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "22770e73-42b4-425e-8579-f0143e05afe5",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "pFXDeyLXyX6T4ZZq",
+  "tags": []
+}

@@ -1,0 +1,551 @@
+{
+  "name": "ch11-2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */15 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "43b5d5b8-387c-43c9-b13e-a48d510addef",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -912,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "assign-messageid",
+              "name": "messageId",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-threadid",
+              "name": "threadId",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-from",
+              "name": "from",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-subject",
+              "name": "subject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-body",
+              "name": "body",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "assign-receiveddate",
+              "name": "receivedDate",
+              "value": "={{ new Date(parseInt($json.internalDate)).toLocaleString('zh-TW', {timeZone: 'Asia/Taipei'}) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b8517459-f566-41bb-8fef-947454834a49",
+      "name": "解析郵件欄位",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -624,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析 LLM 回傳的JSON字串\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  try {\n    // 取得AI回應文字\n    const aiResponse = item.json.message?.content || item.json.content || item.json.text || '';\n    \n    // 清理可能的markdown代碼塊\n    const cleaned = aiResponse\n      .replace(/```json\\n?/g, '')\n      .replace(/```\\n?/g, '')\n      .trim();\n    \n    // 解析JSON\n    const parsed = JSON.parse(cleaned);\n    \n    results.push({\n      json: {\n        ...parsed,\n        _raw: aiResponse\n      }\n    });\n  } catch (e) {\n    // 解析失敗時給予預設值\n    results.push({\n      json: {\n        category: '其他',\n        priority: '低',\n        sentiment: '中性',\n        summary: '無法解析',\n        suggestedAction: '人工審查',\n        needsReply: false,\n        _error: e.message\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "b4c66d52-4e87-432a-b35f-f72727af36a1",
+      "name": "解析AI回應JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1QhNEA18IAWgrFL4yHCgCVRD8XoXzyQHsrdvAtHwFuAY",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "郵件記錄",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "接收時間": "={{ $('解析郵件欄位').item.json.receivedDate }}",
+            "寄件者": "={{ $('解析郵件欄位').item.json.from }}",
+            "主旨": "={{ $('解析郵件欄位').item.json.subject }}",
+            "分類": "={{ $json.category }}",
+            "優先級": "={{ $json.priority }}",
+            "情緒": "={{ $json.sentiment }}",
+            "摘要": "={{ $json.summary }}",
+            "建議處理": "={{ $json.suggestedAction }}"
+          },
+          "matchingColumns": [
+            "接收時間"
+          ],
+          "schema": [
+            {
+              "id": "接收時間",
+              "displayName": "接收時間",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "寄件者",
+              "displayName": "寄件者",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "主旨",
+              "displayName": "主旨",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "分類",
+              "displayName": "分類",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "優先級",
+              "displayName": "優先級",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "情緒",
+              "displayName": "情緒",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "摘要",
+              "displayName": "摘要",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "建議處理",
+              "displayName": "建議處理",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "acb428eb-9ef3-4475-9a3f-6cef08d0b975",
+      "name": "Google Sheets - 記錄郵件",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -608,
+        592
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dfRMztFz1qZVb7av",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-needsreply",
+              "leftValue": "={{ $('解析AI回應JSON').item.json.needsReply }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            },
+            {
+              "id": "cond-category",
+              "leftValue": "={{ $('解析AI回應JSON').item.json.category }}",
+              "rightValue": "客戶詢問",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b7410004-6d5c-4ce6-a8bc-84aa12e1d9ef",
+      "name": "IF - 需要回覆?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('解析郵件欄位').item.json.messageId }}",
+        "emailType": "text",
+        "message": "={{ $json.output[0].content[0].text }}",
+        "options": {}
+      },
+      "id": "d670e6f4-4a4c-4b86-9182-7b4b1d57bf32",
+      "name": "Gmail - 發送回覆",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        352
+      ],
+      "webhookId": "42013c0f-ae0d-4407-b90a-6c8fce834d11",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jltPpBTFenD5gs9t",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        528
+      ],
+      "id": "5fd4b3ab-05ec-4b31-b4ef-244f956806db",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BE03B8XedTGZrDN2",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=根據以下客戶郵件,撰寫專業且友善的回覆:\n原始郵件:\n主旨: {{ $('解析郵件欄位').item.json.subject }}\n內容: {{ $('解析郵件欄位').item.json.body }}\n回覆要求:\n- 語氣專業友善\n- 繁體中文\n- 包含感謝與問候\n- 針對問題提供清晰回答\n- 署名「客服團隊」\n"
+            },
+            {
+              "role": "system",
+              "content": "你是一個專業且友善的客服人員，請用繁體中文撰寫回覆郵件。"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -160,
+        352
+      ],
+      "id": "21b4b49d-a93a-4cb4-bc1b-bdfe8f594ec3",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "oNIFwXwzzn5QyzNJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=分析以下郵件並提供JSON格式回應:\n寄件者: {{$json.from}}\n主旨: {{$json.subject}}\n內容: {{$json.body}}\n請提供:\n1. category: 分類(客戶詢問/訂單通知/系統通知/其他)\n2. priority: 優先級(高/中/低)\n3. sentiment: 情緒(正面/中性/負面)\n4. summary: 30字內摘要\n5. suggestedAction: 建議處理方式\n6. needsReply: 是否需要回覆(true/false)\n\n只回傳JSON格式,不要其他文字。\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "你是一個專業的郵件分析助理，請分析郵件並只回傳JSON格式，不要任何其他文字或markdown語法。"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -480,
+        352
+      ],
+      "id": "851ebbb4-0e2e-4e05-86f3-838ae08f9800",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $('解析郵件欄位').item.json.messageId }}"
+      },
+      "id": "b2ad800b-ca4d-404f-b50f-1a025e391889",
+      "name": "Gmail - 標記已讀取",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        608
+      ],
+      "webhookId": "d707d9eb-a81d-49dd-b116-9e7c2e0054bb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jltPpBTFenD5gs9t",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "filters": {
+          "q": "subject:問題 OR subject:客服",
+          "readStatus": "unread"
+        }
+      },
+      "id": "ba40927a-97bd-42e5-a2c6-da6bed50ed6a",
+      "name": "Gmail - 讀取郵件",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -768,
+        352
+      ],
+      "webhookId": "79cf5355-32d1-4591-bc0a-c08fc9c1a680",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jltPpBTFenD5gs9t",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail - 讀取郵件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析郵件欄位": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析AI回應JSON": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - 記錄郵件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - 記錄郵件": {
+      "main": [
+        [
+          {
+            "node": "IF - 需要回覆?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - 需要回覆?": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail - 標記已讀取",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - 發送回覆": {
+      "main": [
+        [
+          {
+            "node": "Gmail - 標記已讀取",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "解析AI回應JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Gmail - 發送回覆",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - 讀取郵件": {
+      "main": [
+        [
+          {
+            "node": "解析郵件欄位",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "51b19760-ba29-4c40-ade0-6f2d7678db9a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "K8FdIuqMCiywt6FI",
+  "tags": [
+    {
+      "updatedAt": "2026-03-25T11:48:36.649Z",
+      "createdAt": "2026-03-25T11:48:36.649Z",
+      "id": "6gOg8zY3oGDvqjLF",
+      "name": "Gmail自動化"
+    },
+    {
+      "updatedAt": "2026-03-25T11:48:36.658Z",
+      "createdAt": "2026-03-25T11:48:36.658Z",
+      "id": "kyuTh4qdysVeCqeU",
+      "name": "AI分析"
+    }
+  ]
+}

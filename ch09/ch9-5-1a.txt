@@ -1,0 +1,12 @@
+Excel資料清理的提示詞範本：ch9-5-1a.txt
+請寫一個完整的Python程式：
+輸入輸出：透過命令列參數接收，使用 sys.argv 取得參數，sys.argv[1] 為來源Excel檔案路徑，sys.argv[2] 為輸出Excel檔案路徑
+使用套件：pandas
+清理需求：
+- 移除［欄位名］的重複值：df.drop_duplicates()
+- 填補缺失值：df.fillna()，使用［方法：平均值／中位數／固定值］
+- 移除異常值：［條件，如 price > 100000］
+- 資料型態轉換：［欄位］→［型態］
+輸出：將清理後的DataFrame存為Excel檔案
+使用範例：
+python clean.py C:\data\raw.xlsx C:\data\cleaned.xlsx

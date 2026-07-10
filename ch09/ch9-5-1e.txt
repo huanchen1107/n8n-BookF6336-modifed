@@ -1,0 +1,13 @@
+建立Excel樞紐分析表的提示詞範本：ch9-5-1e.txt
+請寫一個完整的Python程式：
+輸入輸出：透過命令列參數接收，使用 sys.argv 取得參數，sys.argv[1] 為來源Excel檔案路徑，sys.argv[2] 為輸出Excel檔案路徑
+使用：pandas.pivot_table()
+樞紐需求：
+- 索引（行）：［欄位名］
+- 欄位（列）：［欄位名］
+- 數值：［欄位名］
+- 聚合函數：［sum／mean／count］
+- 加入小計：margins=True
+輸出：將樞紐分析結果存為Excel檔案
+使用範例：
+python pivot.py C:\data\sales.xlsx C:\data\pivot.xlsx

@@ -1,0 +1,270 @@
+{
+  "name": "ch7-4",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1e7871ab-a6f9-4166-ba41-8d2b5120d1cb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "directoryPath": "C:\\n8n-data\\ch07\\ch7-4\\PDF\\",
+        "listType": "files"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        160,
+        0
+      ],
+      "id": "afceee39-a8c2-4ecf-8fdb-dd9f0740a93d",
+      "name": "File Manager AI"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.fullPath }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        0
+      ],
+      "id": "341f1693-e40d-43bc-9416-c4863b6fbe43",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "c65dd19c-caf6-4e7c-898f-adc5aad78dd5",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text.substring(0, 2000) }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "你是一個專業的檔案命名助手。根據使用者提供的文件內容，為該文件產生一個簡潔、具描述性的檔案名稱。\n規則： \n1. 只回傳檔名，不包含副檔名 \n2. 使用底線 _ 取代空格 \n3. 不要使用特殊字元（只允許中文、英文、數字、底線、連字號） \n4. 長度不超過 50 個字元 \n5. 不要加任何解釋、引號或額外文字，只回傳檔名本身\n\n範例輸出： IT服務合約_2024_台灣科技公司 Q3_2024_財務績效報告 董事會議記錄_2024年11月\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        656,
+        0
+      ],
+      "id": "02943204-0669-4a94-a643-dda63224599e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        592,
+        208
+      ],
+      "id": "8a6d1570-3628-4506-a955-45438255d278",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3fTloRjhqENCKNlp",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1ca37468-a5bb-43d6-8455-6884a4da7b6d",
+              "name": "cleanFileName",
+              "value": "={{ $json.text.replace(/[\\r\\n\\t\\\"\\']/g, '')\n    .replace(/\\s+/g, '_')\n    .trim()\n    .substring(0, 50)\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        0
+      ],
+      "id": "349f1fcc-4e14-4c84-a690-1932277d80a2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "456fb0e9-0868-4326-a375-45ce93016572",
+              "name": "outputPath",
+              "value": "=C:/n8n-data/ch07/ch7-4/PDF/output/{{ $json.cleanFileName }}.pdf",
+              "type": "string"
+            },
+            {
+              "id": "5641f453-d803-4444-82a4-a02405562dcb",
+              "name": "sourcePath",
+              "value": "={{ $('File Manager AI').item.json.fullPath }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        192
+      ],
+      "id": "d7b3bcee-eb77-43da-997c-c930f6a91f46",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "copy",
+        "sourcePath": "={{ $json.sourcePath }}",
+        "destinationPath": "={{ $json.outputPath }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        944,
+        192
+      ],
+      "id": "94e9b959-42b7-41e3-ba65-10f1b816de75",
+      "name": "File Manager AI1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Manager AI": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f897ff2e-2e21-40e2-83e0-bf38d9b99650",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "l6pp9mROjq1mrLlB",
+  "tags": []
+}

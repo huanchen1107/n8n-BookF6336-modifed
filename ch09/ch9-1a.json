@@ -1,0 +1,128 @@
+{
+  "name": "ch9-1a",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "C:\\n8n-data\\ch09\\input",
+        "events": [
+          "add"
+        ],
+        "options": {
+          "ignored": "!(*.xlsx)"
+        }
+      },
+      "id": "dac061cc-22ca-4623-b010-1e2cfc167c9e",
+      "name": "Local File Trigger",
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=python C:\\n8n-data\\ch09\\data_cleaner.py \"{{ $json.path }}\" \"C:\\n8n-data\\ch09\\output\\cleaned_{{ $json.name }}\""
+      },
+      "id": "fa037c01-37d8-4fcf-b3f6-447485644d57",
+      "name": "Execute Command (Data Cleaning)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=python C:\\n8n-data\\ch09\\data_analyzer.py \"C:\\n8n-data\\ch09\\output\\cleaned_{{ $('Edit Fields').item.json.name }}\""
+      },
+      "id": "9e50813b-707e-4d24-be17-b03ab1fbbffd",
+      "name": "Execute Command (Analysis)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        496,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1660c789-11b9-48ff-a9b3-d0a0e5ae5083",
+              "name": "path",
+              "value": "={{ $json.path }}",
+              "type": "string"
+            },
+            {
+              "id": "fe2e7566-ae0b-4b00-ac06-e163d8423d56",
+              "name": "name",
+              "value": "={{ $json.path.split(/[\\\\/]/).last() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "e54752a6-6550-450c-9c5c-55a4c78e7043",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Local File Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command (Data Cleaning)": {
+      "main": [
+        [
+          {
+            "node": "Execute Command (Analysis)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute Command (Data Cleaning)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "20038b64-e3fc-408e-aa6c-126f10b7da30",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "TY0h7jF9DXfrDSIk",
+  "tags": []
+}

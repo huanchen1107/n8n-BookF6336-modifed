@@ -1,0 +1,9 @@
+請為 n8n Code 節點 (JavaScript) 寫合併程式碼。
+輸入來源：
+- const items1 = $input.first().json  // 或 $('Node1').all()
+- const items2 = $input.last().json   // 或 $('Node2').all()
+資料範例：
+- items1: [JSON1 範例]
+- items2: [JSON2 範例]
+需求：根據 [欄位名，如 id] 進行 JOIN 合併
+輸出：return 合併後的陣列，格式 [{json: {...}}]

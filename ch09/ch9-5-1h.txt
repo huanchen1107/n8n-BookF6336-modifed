@@ -1,0 +1,13 @@
+Excel多工作表處理的提示詞範本：ch9-5-1h.txt
+請寫一個完整的Python程式：
+輸入輸出：透過命令列參數接收，使用 sys.argv 取得參數，sys.argv[1] 為來源Excel檔案路徑，sys.argv[2] 為輸出Excel檔案路徑
+需求：
+1. 使用 pd.read_excel(input_path, sheet_name=None) 讀取所有工作表
+2. 或指定工作表：sheet_name=['Sheet1', 'Sheet2']
+3. 處理每個工作表的資料（合併／分析／轉換）
+4. 輸出選項：
+   - 合併成單一工作表
+   - 或保持分開並標註來源工作表名稱
+輸出：將處理結果存為Excel檔案
+使用範例：
+python multisheet.py C:\data\workbook.xlsx C:\data\merged.xlsx

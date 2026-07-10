@@ -1,0 +1,134 @@
+{
+  "name": "ch7-2-1",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "45b7824c-27d7-4395-9be4-89a5cb3d37d6",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a0f4971c-3b7b-49d0-b5a3-0bfb7e4cd67b",
+              "leftValue": "={{ $json.size }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        0
+      ],
+      "id": "d5a7e0bc-4b5e-4985-b4be-d55ab20e7f0a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "directoryPath": "={{ $json.path }}"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "f664a862-700d-4edd-b99c-c4b12c37ec03",
+      "name": "File Manager AI"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cbab0a9e-a1cf-4a05-b10d-410ab6af9688",
+              "name": "path",
+              "value": "C:\\n8n-data\\ch07\\教育訓練成績",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "f6328fe9-c571-4c9d-85ca-329be61ba5fb",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Manager AI": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fe40d2f0-d60c-4fb9-9bbf-63dd608bc4d4",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "M46HP6YvWRA7aC0C",
+  "tags": []
+}

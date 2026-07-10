@@ -1,0 +1,479 @@
+{
+  "name": "ch7-5",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        96
+      ],
+      "id": "96463bba-a922-4173-b008-f3dab0f7459e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "directoryPath": "C:\\n8n-data\\ch07\\ch7-5\\files",
+        "filterPattern": "*.pdf,*.docx",
+        "listType": "files",
+        "outputMode": "array"
+      },
+      "type": "n8n-nodes-filemanager-ai.fileManagerAi",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        96
+      ],
+      "id": "42d0f994-1d16-4434-8c9f-8df5f9ae5738",
+      "name": "File Manager AI"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        96
+      ],
+      "id": "eea17cca-ed18-47f5-97d2-88bd936895d0",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.extension }}",
+                    "rightValue": ".pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "04141eb5-b470-4a40-aac2-51b098e081ee"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "65a97ebb-34c9-4785-b5a6-aa1736ae8b74",
+                    "leftValue": "={{ $json.extension }}",
+                    "rightValue": ".docx",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        96
+      ],
+      "id": "f77f4934-1edc-4430-8102-05eec3526e67",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.fullPath }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "e2abed34-b7d9-45d7-96dd-f31e76cfc90e",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        -64
+      ],
+      "id": "e8f0a726-cecb-402e-b2a2-152eb60064f7",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=python C:\\\\n8n-data\\\\ch07\\\\read_docx.py \"{{ $json.fullPath }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        128
+      ],
+      "id": "f623177a-587b-4e09-a9be-91effd22f385",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10c2dfca-c044-467a-b1b5-9bdd879c339d",
+              "name": "fileName",
+              "value": "={{ $('Switch').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "69b2e99d-e9ac-4572-98fb-9b9cfda36f92",
+              "name": "fileExtension",
+              "value": "={{ $('Switch').item.json.extension }}",
+              "type": "string"
+            },
+            {
+              "id": "71f962df-7442-4e4c-b514-d513cae5ccce",
+              "name": "filePath",
+              "value": "={{ $('Switch').item.json.fullPath }}",
+              "type": "string"
+            },
+            {
+              "id": "41e7df8a-72b7-4003-a3c0-dc01d4f344f7",
+              "name": "textContent",
+              "value": "={{ JSON.parse($json.stdout).full_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        128
+      ],
+      "id": "2d27a8f4-21f1-464b-9c94-1717f26ba207",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        336,
+        128
+      ],
+      "id": "81f4e323-af38-4569-b777-a15e78692439",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c80722f3-122a-4d07-84a2-5d8cb653ee91",
+              "name": "fileName",
+              "value": "={{ $('Switch').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "cd76e012-9a37-4597-b2b8-2a162d943bc4",
+              "name": "fileExtension",
+              "value": "={{ $('Switch').item.json.extension }}",
+              "type": "string"
+            },
+            {
+              "id": "e07c5c9b-b542-472d-8132-d32b2c60a314",
+              "name": "filePath",
+              "value": "={{ $('Switch').item.json.fullPath }}",
+              "type": "string"
+            },
+            {
+              "id": "8c363879-dd0a-408b-afd1-3909a770426d",
+              "name": "textContent",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        -64
+      ],
+      "id": "55ea4028-a818-4855-8352-31740355d59e",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $json.textContent.substring(0, 2000) }}"
+            },
+            {
+              "role": "system",
+              "content": "你是一位專業的文件摘要助手。\n請根據提供的文件內容，用繁體中文產生一段 100-150 字的精簡摘要。\n\n請嚴格只回傳以下 JSON 格式，不要有任何額外文字或 Markdown：\n{\n  \"summary\": \"摘要內容\",\n  \"documentType\": \"文件類型（如：財務報告、專案計畫、服務報告、訓練計畫等）\"\n}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -400,
+        320
+      ],
+      "id": "229377cb-1725-4dc8-a31c-08d51309ce90",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "oNIFwXwzzn5QyzNJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f14f0876-d6e0-4f8b-9ca4-15f9760dcabd",
+              "name": "aiSummary",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).summary }}",
+              "type": "string"
+            },
+            {
+              "id": "f5a37e38-9b32-44ca-ba31-9423a884fbb9",
+              "name": "documentType",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).documentType }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        320
+      ],
+      "id": "f0a6b35f-82e0-46e5-aad4-c82ff7f32dd1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch07\\ch7-5\\document_summary.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "Document Summary",
+        "rowData": "={\n  \"檔案名稱\": \"{{ $('Merge').item.json.fileName }}\",\n  \"副檔名\": \"{{ $('Merge').item.json.fileExtension }}\",\n  \"檔案路徑\": \"{{ $('Merge').item.json.filePath }}\",\n  \"AI 摘要\": \"{{ $json.aiSummary }}\",\n  \"文件類型\": \"{{ $json.documentType }}\"\n}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        64,
+        320
+      ],
+      "id": "a58f431c-b3fa-4c32-9199-b9b8e95fc35d",
+      "name": "Add row to Excel"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "File Manager AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Manager AI": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Add row to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0582bf37-9c72-4ff1-8068-55c27a0c1e04",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "GB8jpanAJm0veDlE",
+  "tags": []
+}

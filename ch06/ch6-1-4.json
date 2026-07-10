@@ -1,0 +1,198 @@
+{
+  "name": "ch6-1-4",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        320
+      ],
+      "id": "d8a638b3-5064-408b-8cb1-84add2e3d7ec",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch06\\luckydraw.xlsx",
+        "sheetNameOptions": "工作表1"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        160,
+        320
+      ],
+      "id": "bce20073-309f-4389-a952-b34fe9644ace",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        512,
+        304
+      ],
+      "id": "ec27eefd-cbf8-4215-b122-31fee4576f2b",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "fromEmail": "hueyanchen2020@gmail.com",
+        "toEmail": "={{ $json['信箱'] }}",
+        "subject": "恭喜中獎！抽獎結果通知。",
+        "emailFormat": "text",
+        "text": "=你好 {{ $json[\"姓名\"] }}，恭喜你獲得了 {{ $json[\"獎品\"] }}！請儘速回覆本郵件領取。",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        384
+      ],
+      "id": "758df3ed-b002-4f06-8fb1-79192ad895d6",
+      "name": "Send an Email",
+      "webhookId": "9c1ccfea-e705-48e8-a706-fe23bff88474",
+      "credentials": {
+        "smtp": {
+          "id": "UM06ssDnTxzoirMQ",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1c300ea6-5dcb-412e-a939-3b916391d7e3",
+              "leftValue": "={{ $json['中獎狀態'] }}",
+              "rightValue": "是",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        304,
+        320
+      ],
+      "id": "95be0ee4-cd65-45dc-92a8-6b61f5745b00",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        816,
+        384
+      ],
+      "id": "8140fc68-3687-4449-96b4-b09b1df96a5b",
+      "name": "Wait",
+      "webhookId": "84f25381-ea91-4331-82d7-153d68a515fe"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an Email": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "afa9719b-e2a4-4e87-a4f3-34656abda15d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "Ms1VyYqvmKegrrhC",
+  "tags": []
+}

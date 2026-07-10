@@ -1,0 +1,125 @@
+{
+  "name": "ch7-3-3b",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ae48c289-1688-4c31-8ceb-526a4e23a820",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af531b7f-f797-45f1-a1c9-ea57d6568d69",
+              "name": "sourcePath",
+              "value": "C:\\n8n-data\\ch07\\在本機n8n使用LINEMessage.docx",
+              "type": "string"
+            },
+            {
+              "id": "3833b561-3dbe-435b-9063-b9da21ec8efd",
+              "name": "outputPath",
+              "value": "C:\\n8n-data\\ch07\\在本機n8n使用LINEMessage.pdf",
+              "type": "string"
+            },
+            {
+              "id": "428315f2-d2fd-4dc7-b3f5-69449b159043",
+              "name": "tempPath",
+              "value": "C:\\n8n-data\\ch07\\temp.html",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "d5317522-3a96-4786-a15e-1e68efb76794",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "command": "=C:\\n8n-data\\tools\\tools\\wkhtmltox\\bin\\wkhtmltopdf \"{{ $('Edit Fields').item.json.tempPath }}\" \"{{ $('Edit Fields').item.json.outputPath }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "a1714e01-7ed2-4481-be6f-7888a1d93b03",
+      "name": "Execute Command-Convert to PDF"
+    },
+    {
+      "parameters": {
+        "command": "=C:\\n8n-data\\tools\\tools\\pandoc\\pandoc -s \"{{ $json.sourcePath }}\" -o \"{{ $json.tempPath }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "3ed33842-97f9-444f-9d3f-2144b208be33",
+      "name": "Execute Command-Convert to HTML"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute Command-Convert to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command-Convert to HTML": {
+      "main": [
+        [
+          {
+            "node": "Execute Command-Convert to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e6ea9fc2-673b-4b46-b15c-9b24afa04cc4",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "lqe938J7PZyRl8yu",
+  "tags": []
+}

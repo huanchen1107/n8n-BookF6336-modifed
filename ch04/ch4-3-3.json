@@ -1,0 +1,184 @@
+{
+  "name": "ch4-3-3",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "31c5057b-0119-4796-a188-559375fa196a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        192
+      ],
+      "id": "4e3cb98b-18b9-481a-8a0e-55418da93554",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        0
+      ],
+      "id": "c0610015-5498-436c-835e-6f90da6681bb",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f7565fd0-2dab-4103-bfe5-544ba91e31da",
+              "name": "日期",
+              "value": "={{ DateTime.fromMillis(($json[\"銷售日期\"] - 25568) * 86400 * 1000).toFormat('yyyy/MM/dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "4d083204-7d18-43f2-a1a4-4bb850517c63",
+              "name": "商品名稱",
+              "value": "={{ $json['商品名稱'] }}",
+              "type": "string"
+            },
+            {
+              "id": "259a9ac4-bc82-4785-beac-c3d3998909d8",
+              "name": "商品類別",
+              "value": "={{ $json['商品類別'] }}",
+              "type": "string"
+            },
+            {
+              "id": "3d7a016b-3c03-47b8-bcb9-58970efb6431",
+              "name": "小計",
+              "value": "={{ $json.單價 * $json.數量 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        0
+      ],
+      "id": "eefac3a8-e645-4f8e-b7b9-bc7ad27668ac",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:\\n8n-data\\ch04\\銷售資料2.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "2b594715-ff25-4c66-b93b-03e4b8c2040b",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:\\n8n-data\\ch04\\電子商品5.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        192
+      ],
+      "id": "3e346275-93c7-4fea-930d-5bf81e80e8b9",
+      "name": "Read/Write Files from Disk1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "94d3734d-ee04-4886-93f4-1ed9e3b8f6f3",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "CA679NYEA48GmO48",
+  "tags": []
+}

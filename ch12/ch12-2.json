@@ -1,0 +1,1055 @@
+{
+  "name": "ch12-2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "linebot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "31fabed2-fd97-4eda-8c30-1b9b068fdce0",
+      "name": "Webhook - 接收LINE訊息",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -176
+      ],
+      "webhookId": "line-support-webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "f1f96e5d-1c92-4d00-9dc3-fc92bf8b5eaa",
+      "name": "立即回應 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析 LINE Webhook 事件，處理文字訊息與新好友加入\nconst events = $input.first().json.body.events || [];\nconst processedEvents = [];\n\nfor (const event of events) {\n  if (event.type === 'message' && event.message.type === 'text') {\n    processedEvents.push({\n      json: {\n        replyToken: event.replyToken,\n        userId: event.source.userId,\n        groupId: event.source.groupId || null,\n        messageText: event.message.text,\n        messageId: event.message.id,\n        timestamp: event.timestamp,\n        eventType: 'message'\n      }\n    });\n  } else if (event.type === 'follow') {\n    processedEvents.push({\n      json: {\n        replyToken: event.replyToken,\n        userId: event.source.userId,\n        eventType: 'follow',\n        timestamp: event.timestamp,\n        messageText: '',\n        messageId: ''\n      }\n    });\n  }\n}\n\n// 若沒有符合事件，回傳空佔位避免流程中斷\nif (processedEvents.length === 0) {\n  return [{ json: { eventType: 'ignore', userId: '', replyToken: '' } }];\n}\n\nreturn processedEvents;"
+      },
+      "id": "14e9d91e-ab89-4e0b-9fba-27344f546b7d",
+      "name": "Code - 解析LINE事件",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-follow",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "follow",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "新好友"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-message",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "message",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "訊息"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "45280070-b4db-4672-85eb-f58f00bea2c0",
+      "name": "Switch - 事件類型分流",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        128,
+        -144
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $('Code - 解析LINE事件').item.json.replyToken }}\",\n  \"messages\": [\n    {\n      \"type\": \"text\",\n      \"text\": \"👋 歡迎使用智能客服系統！\\n\\n我是AI助理，可以幫您：\\n✓ 產品諮詢\\n✓ 訂單查詢\\n✓ 常見問題解答\\n✓ 技術支援\\n\\n請直接輸入您的問題，我會盡快為您服務！\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "145ccbed-73f5-4894-9530-d9bbee1a6bdd",
+      "name": "HTTP - 發送歡迎訊息",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        304,
+        -224
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "hMUvjZ5BNCkVDBFm",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 組合用戶上下文，提供給 OpenAI 使用\nconst currentMessage = $('Code - 解析LINE事件').first().json;\nconst userProfile = $input.first().json;\n\nconst context = {\n  userId: currentMessage.userId,\n  replyToken: currentMessage.replyToken,\n  currentQuestion: currentMessage.messageText,\n  userName: userProfile?.['用戶名稱'] || '訪客',\n  previousIssues: userProfile?.['歷史問題'] || '無',\n  interactionCount: Number(userProfile?.['互動次數'] || 0),\n  lastInteraction: userProfile?.['上次互動時間'] || '首次互動',\n  satisfactionScore: userProfile?.['滿意度'] || 'N/A',\n  isNewUser: !userProfile?.['LINE用戶ID'], \n  rowNumber: Number(userProfile?.['_rowNumber'] || 0)\n};\n\nreturn [{ json: context }];"
+      },
+      "id": "eadd70d9-4cf6-4e3c-906e-8519372d5245",
+      "name": "Code - 組合用戶上下文",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 將 FAQ 資料庫轉為純文字，方便放入 OpenAI Prompt\nconst faqs = $input.all();\n\nif (faqs.length === 0 || !faqs[0].json['問題']) {\n  return [{ json: { faqKnowledge: '（知識庫目前為空，請稍後）' } }];\n}\n\nconst faqText = faqs\n  .filter(item => item.json['問題'] && item.json['答案'])\n  .map((item, index) => {\n    const cat = item.json['分類'] ? ` [${item.json['分類']}]` : '';\n    return `Q${index + 1}${cat}: ${item.json['問題']}\\nA: ${item.json['答案']}`;\n  })\n  .join('\\n\\n');\n\nreturn [{ json: { faqKnowledge: faqText } }];"
+      },
+      "id": "483ee71e-c1a5-446e-a578-1c3b3639fbf7",
+      "name": "Code - 轉換FAQ為文字",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 解析 OpenAI 回傳的 JSON 字串\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  try {\n    const raw = item.json.output?.[0]?.content?.[0]?.text \n         || item.json.message?.content \n         || item.json.content \n         || item.json.text \n         || '';\n    const cleaned = raw.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n    const parsed = JSON.parse(cleaned);\n    \n    // 判斷是否需要人工：needHuman=true 或 confidence=低 或 answer=NEED_HUMAN\n    const needHuman = parsed.needHuman === true\n      || parsed.confidence === '低';\n    \n    results.push({\n      json: {\n        answer: parsed.answer || '',\n        needHuman: needHuman,\n        category: parsed.category || '未分類',\n        confidence: parsed.confidence || '低'\n      }\n    });\n  } catch (e) {\n    results.push({\n      json: {\n        answer: 'NEED_HUMAN',\n        needHuman: true,\n        category: '解析錯誤',\n        confidence: '低',\n        _error: e.message\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "dd809635-4704-410a-932b-26ed9c05bbcb",
+      "name": "Code - 解析AI回應JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-need-human",
+              "leftValue": "={{ $json.needHuman }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ef832c52-bc6b-48bd-9bbe-486fdfb349f5",
+      "name": "IF - 需要人工處理?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $('Code - 解析LINE事件').item.json.replyToken }}\",\n  \"messages\": [{\n    \"type\": \"text\",\n    \"text\": \"感謝您的提問！這個問題需要專人服務。\\n\\n客服人員將在30分鐘內聯繫您。\\n\\n問題記錄：\\n「{{ $('Code - 組合用戶上下文').item.json.currentQuestion }}」\\n\\n服務編號：#{{ $now.toMillis() }}\"\n  }]\n}",
+        "options": {}
+      },
+      "id": "d1d0dd55-f624-49c5-81db-e4e56fdd578c",
+      "name": "HTTP - 回覆轉人工訊息",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16,
+        176
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "hMUvjZ5BNCkVDBFm",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.line.me/v2/bot/message/reply",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"replyToken\": \"{{ $('Code - 解析LINE事件').item.json.replyToken }}\",\n  \"messages\": [{\n    \"type\": \"text\",\n    \"text\": \"{{ $('Code - 解析AI回應JSON').item.json.answer }}\\n\\n---\\n這個回答有幫助嗎？\\n請回覆「滿意」或「不滿意」\"\n  }]\n}",
+        "options": {}
+      },
+      "id": "6b120f52-65fa-44e8-816a-a90655ef523d",
+      "name": "HTTP - 回覆AI答案",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16,
+        368
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "hMUvjZ5BNCkVDBFm",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-notify-team",
+              "leftValue": "={{ $('Code - 解析AI回應JSON').item.json.needHuman }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1db8b2cf-a3d5-4d34-a7df-845fa14124b1",
+      "name": "IF - 需要通知客服?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "test@example.com",
+        "subject": "=🔔 LINE客服 - 需要人工處理 [{{ $('Code - 解析AI回應JSON').item.json.category }}]",
+        "message": "=<h2>🔔 LINE客服 - 需要人工處理</h2>\n<table style=\"border-collapse:collapse;width:100%;font-family:Arial\">\n  <tr><td style=\"background:#2E75B6;color:white;padding:8px 12px;font-weight:bold\">項目</td><td style=\"background:#2E75B6;color:white;padding:8px 12px;font-weight:bold\">內容</td></tr>\n  <tr style=\"background:#f9fbfd\"><td style=\"padding:8px 12px;border:1px solid #ddd\">👤 用戶姓名</td><td style=\"padding:8px 12px;border:1px solid #ddd\">{{ $('Code - 組合用戶上下文').item.json.userName }}</td></tr>\n  <tr><td style=\"padding:8px 12px;border:1px solid #ddd\">🆔 LINE 用戶ID</td><td style=\"padding:8px 12px;border:1px solid #ddd\">{{ $('Code - 組合用戶上下文').item.json.userId }}</td></tr>\n  <tr style=\"background:#f9fbfd\"><td style=\"padding:8px 12px;border:1px solid #ddd\">🔄 互動次數</td><td style=\"padding:8px 12px;border:1px solid #ddd\">{{ $('Code - 組合用戶上下文').item.json.interactionCount }} 次</td></tr>\n  <tr><td style=\"padding:8px 12px;border:1px solid #ddd\">❓ 用戶問題</td><td style=\"padding:8px 12px;border:1px solid #ddd;color:#C00000;font-weight:bold\">{{ $('Code - 組合用戶上下文').item.json.currentQuestion }}</td></tr>\n  <tr style=\"background:#f9fbfd\"><td style=\"padding:8px 12px;border:1px solid #ddd\">🏷️ 問題分類</td><td style=\"padding:8px 12px;border:1px solid #ddd\">{{ $('Code - 解析AI回應JSON').item.json.category }}</td></tr>\n  <tr><td style=\"padding:8px 12px;border:1px solid #ddd\">📊 AI信心程度</td><td style=\"padding:8px 12px;border:1px solid #ddd\">{{ $('Code - 解析AI回應JSON').item.json.confidence }}</td></tr>\n</table>\n<p style=\"margin-top:16px;color:#555\">請盡快透過 LINE 回覆客戶。此為自動通知郵件。</p>",
+        "options": {}
+      },
+      "id": "933be6d6-cc25-4e27-9a00-eb7ded64ea42",
+      "name": "Gmail - 通知客服團隊",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1040,
+        192
+      ],
+      "webhookId": "e803e799-f884-4c5d-bb1f-c9356be6a928",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jltPpBTFenD5gs9t",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.line.me/v2/bot/profile/{{ $('Code - 組合用戶上下文').item.json.userId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        320,
+        368
+      ],
+      "id": "79993700-1fc1-49c1-bb9b-fe1434337eb9",
+      "name": "HTTP - 取得用戶資訊",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "hMUvjZ5BNCkVDBFm",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch12\\LINE客服記錄.xlsx",
+        "operation": "filterRows",
+        "sheetNameOptions": "用戶檔案",
+        "filterConditions": {
+          "conditions": [
+            {
+              "field": "LINE用戶ID",
+              "value": "={{ $('Code - 解析LINE事件').item.json.userId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        304,
+        -32
+      ],
+      "id": "9efbe489-3313-43c2-9a14-8631ab5e3762",
+      "name": "Excel AI  - 查詢用戶歷史",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch12\\FAQ知識庫.xlsx",
+        "sheetNameOptions": "FAQ資料庫",
+        "includeRowNumber": false
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -32
+      ],
+      "id": "08e9f63d-240f-46b2-a364-14b8be72f282",
+      "name": "Excel AI  - 讀取FAQ知識庫"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=用戶資訊：\n- 用戶姓名：{{ $('Code - 組合用戶上下文').item.json.userName }}\n- 互動次數：{{ $('Code - 組合用戶上下文').item.json.interactionCount }} 次\n- 上次互動：{{ $('Code - 組合用戶上下文').item.json.lastInteraction }}\n\n知識庫內容：\n{{ $('Code - 轉換FAQ為文字').item.json.faqKnowledge }}\n\n用戶問題：{{ $('Code - 組合用戶上下文').item.json.currentQuestion }}\n\n回答要求：\n1. 根據知識庫提供準確答案\n2. 語氣友善專業\n3. 繁體中文\n4. 如知識庫沒有相關資訊，answer 填 \"NEED_HUMAN\"\n5. 涉及訂單查詢、退換貨等需要個資的問題，needHuman 設為 true\n6. 回答簡潔（150字內）\n\n只回傳以下 JSON，不要任何其他文字：\n{\"answer\":\"回答內容\",\"needHuman\":true或false,\"category\":\"問題分類\",\"confidence\":\"高或中或低\"}"
+            },
+            {
+              "role": "system",
+              "content": "你是專業的客服AI助理，根據知識庫回答用戶問題。只回傳純 JSON，不要 markdown 碼或其他文字。"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        912,
+        -32
+      ],
+      "id": "27ddd93a-0ca8-4e1a-8065-a2416cbcb9ac",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "oNIFwXwzzn5QyzNJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8127bebc-ba24-496a-bf45-29c73709d9df",
+              "name": "時間",
+              "value": "={{ new Date(Number($('Code - 解析LINE事件').item.json.timestamp) + 8 * 60 * 60 * 1000).toLocaleString('zh-TW', {timeZone: 'UTC'}) }}",
+              "type": "string"
+            },
+            {
+              "id": "c3a16f35-38df-4134-8a38-35400d2394ee",
+              "name": "用戶ID",
+              "value": "={{ $('Code - 組合用戶上下文').item.json.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "9b124084-5a80-4e31-b229-357d91d3d86b",
+              "name": "用戶名稱",
+              "value": "={{ $json.userName }}",
+              "type": "string"
+            },
+            {
+              "id": "e46f6286-13ad-4fe2-8c0a-47d577ec7fa5",
+              "name": "問題",
+              "value": "={{ $('Code - 組合用戶上下文').item.json.currentQuestion }}",
+              "type": "string"
+            },
+            {
+              "id": "28acf998-f119-4fb5-8a31-4bd950e95b01",
+              "name": "AI回答",
+              "value": "={{ $('Code - 解析AI回應JSON').item.json.answer }}",
+              "type": "string"
+            },
+            {
+              "id": "f78a5971-3d04-4189-94cd-4eebd520220b",
+              "name": "問題分類",
+              "value": "={{ $('Code - 解析AI回應JSON').item.json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "07fd4d0c-dfd8-4dfd-985a-872e99f8a6e8",
+              "name": "需要人工",
+              "value": "={{ $('Code - 解析AI回應JSON').item.json.needHuman }}",
+              "type": "boolean"
+            },
+            {
+              "id": "02aeb6c2-ae33-43ab-aa9b-1a841ecb15b5",
+              "name": "信心程度",
+              "value": "={{ $('Code - 解析AI回應JSON').item.json.confidence }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        176
+      ],
+      "id": "034e75e2-745f-4f1d-b355-75525371bdb4",
+      "name": "Edit Fields - 整理對話記錄"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch12\\LINE客服記錄.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "對話記錄",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        848,
+        176
+      ],
+      "id": "b12d6b98-709c-4444-86e1-7f6cc867e5d6",
+      "name": "Excel AI -  新增記錄對話"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "82bcd669-7dcd-41d2-bc2f-d802a0e5783f",
+              "leftValue": "={{ $('Code - 組合用戶上下文').item.json.isNewUser }}",
+              "rightValue": "訪客",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        272
+      ],
+      "id": "b0a24da7-f005-40f6-9e0e-f7473f2c54cf",
+      "name": "IF - 不是訪客"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c55bcb7d-fa80-40d9-82fd-fc29e287a9bd",
+              "name": "userName",
+              "value": "={{ $('Code - 組合用戶上下文').item.json.userName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        352,
+        176
+      ],
+      "id": "d12eab98-2a7c-4967-af2b-ce8da60b951b",
+      "name": "Edit Fields - 取得用戶名稱"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dcd4dd66-e246-4ae4-9648-fe3e9b2e8746",
+              "name": "userName",
+              "value": "={{ $json.displayName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        288
+      ],
+      "id": "9e1b3f69-8d8a-4861-b87b-b07783266759",
+      "name": "Edit Fields - 取得訪客的用戶名稱"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1cff4eb8-f96f-40f4-9a08-8fa83d1030f7",
+              "name": "LINE用戶ID",
+              "value": "={{ $('Code - 組合用戶上下文').item.json.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "bc0e775c-408e-467d-9fa8-14de4a848a50",
+              "name": "用戶名稱",
+              "value": "={{ $('Edit Fields - 整理對話記錄').item.json['用戶名稱'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2ac70efe-c4f2-4a1e-9470-36dc5789f582",
+              "name": "互動次數",
+              "value": "={{ $('Code - 組合用戶上下文').item.json.interactionCount + 1}}",
+              "type": "number"
+            },
+            {
+              "id": "77a9b4b4-b108-4cb8-803b-bd015e08ecbf",
+              "name": "上次互動時間",
+              "value": "={{ new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().replace('T', ' ').replace(/\\..+/, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "e6b0fcfa-4270-48bd-802f-3bc2b2e67a8e",
+              "name": "上次問題",
+              "value": "={{ $('Code - 組合用戶上下文').item.json.currentQuestion }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        416
+      ],
+      "id": "e3593bd5-a166-4855-9399-c341d5408929",
+      "name": "Edit Fields - 更新用戶資料"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch12\\LINE客服記錄.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "用戶檔案",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        240
+      ],
+      "id": "57acfb57-4fae-4cc7-8367-d3d8819291f7",
+      "name": "Excel AI - 新增用戶"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch12\\LINE客服記錄.xlsx",
+        "operation": "updateRow",
+        "sheetNameOptions": "用戶檔案",
+        "rowNumber": "={{ $('Code - 組合用戶上下文').item.json.rowNumber }}",
+        "updatedData": "={{$json}}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        432
+      ],
+      "id": "ff5bdb8f-6cbb-4229-8870-179dee5d1963",
+      "name": "Excel AI - 更新用戶"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4b97cab5-d08d-443e-b55e-15fe53b07806",
+              "leftValue": "={{ $('Code - 組合用戶上下文').item.json.isNewUser }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1072,
+        416
+      ],
+      "id": "3cec71e6-249a-44ed-be6b-75ad1ca1e0a5",
+      "name": "IF - 新用戶"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - 接收LINE訊息": {
+      "main": [
+        [
+          {
+            "node": "立即回應 200 OK",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code - 解析LINE事件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - 解析LINE事件": {
+      "main": [
+        [
+          {
+            "node": "Switch - 事件類型分流",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - 事件類型分流": {
+      "main": [
+        [
+          {
+            "node": "HTTP - 發送歡迎訊息",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Excel AI  - 查詢用戶歷史",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - 組合用戶上下文": {
+      "main": [
+        [
+          {
+            "node": "Excel AI  - 讀取FAQ知識庫",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - 轉換FAQ為文字": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - 解析AI回應JSON": {
+      "main": [
+        [
+          {
+            "node": "IF - 需要人工處理?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - 需要人工處理?": {
+      "main": [
+        [
+          {
+            "node": "HTTP - 回覆轉人工訊息",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP - 回覆AI答案",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - 回覆轉人工訊息": {
+      "main": [
+        [
+          {
+            "node": "IF - 不是訪客",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - 回覆AI答案": {
+      "main": [
+        [
+          {
+            "node": "IF - 不是訪客",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - 需要通知客服?": {
+      "main": [
+        [
+          {
+            "node": "Gmail - 通知客服團隊",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields - 更新用戶資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - 通知客服團隊": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - 更新用戶資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - 取得用戶資訊": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - 取得訪客的用戶名稱",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - 發送歡迎訊息": {
+      "main": [
+        []
+      ]
+    },
+    "Excel AI  - 查詢用戶歷史": {
+      "main": [
+        [
+          {
+            "node": "Code - 組合用戶上下文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel AI  - 讀取FAQ知識庫": {
+      "main": [
+        [
+          {
+            "node": "Code - 轉換FAQ為文字",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code - 解析AI回應JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - 整理對話記錄": {
+      "main": [
+        [
+          {
+            "node": "Excel AI -  新增記錄對話",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel AI -  新增記錄對話": {
+      "main": [
+        [
+          {
+            "node": "IF - 需要通知客服?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - 不是訪客": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - 取得用戶名稱",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP - 取得用戶資訊",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - 取得用戶名稱": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - 整理對話記錄",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - 取得訪客的用戶名稱": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields - 整理對話記錄",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields - 更新用戶資料": {
+      "main": [
+        [
+          {
+            "node": "IF - 新用戶",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel AI - 新增用戶": {
+      "main": [
+        []
+      ]
+    },
+    "IF - 新用戶": {
+      "main": [
+        [
+          {
+            "node": "Excel AI - 新增用戶",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Excel AI - 更新用戶",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7b5349bd-8126-48e1-9325-6b79d78021e2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "dZqL9ZgHMqASeM3f",
+  "tags": [
+    {
+      "updatedAt": "2026-03-25T13:47:10.084Z",
+      "createdAt": "2026-03-25T13:47:10.084Z",
+      "id": "4O3pUGilSOzU5S2e",
+      "name": "AI自動化"
+    },
+    {
+      "updatedAt": "2026-03-25T13:47:10.081Z",
+      "createdAt": "2026-03-25T13:47:10.081Z",
+      "id": "B9LfSFzGFr5jqcp6",
+      "name": "LINE客服"
+    }
+  ]
+}

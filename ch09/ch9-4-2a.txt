@@ -1,0 +1,8 @@
+請為 n8n Code 節點 (JavaScript) 寫過濾程式碼。
+輸入資料來源：$input.all()
+資料範例：
+[輸入 JSON]
+篩選條件：
+- 條件1：[例如：item.json.price > 1000]
+- 條件2：[例如：item.json.status === 'active']
+請使用 .filter() 方法處理並 return 結果陣列。

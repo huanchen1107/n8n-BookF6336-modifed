@@ -1,0 +1,447 @@
+{
+  "name": "ch5-2-3",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "shipping-form",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b247f4dc-373b-477a-b4d4-8652137c28c1",
+      "name": "Webhook",
+      "webhookId": "2c0e474b-7345-4e95-9a90-0d86c9921d2a"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html>\n<html lang=\"zh-TW\">\n<head>\n<meta charset=\"UTF-8\">\n<title>出貨管理</title>\n<style>\n  body { font-family: Arial, sans-serif; max-width: 480px; margin: 60px auto; background: #f5f0ff; }\n  .card { background: white; padding: 32px; border-radius: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }\n  h2 { color: #7D3C98; }\n  input { width: 100%; padding: 9px 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px; margin-top: 6px; }\n  button { width: 100%; margin-top: 16px; padding: 12px; background: #7D3C98; color: white; border: none; border-radius: 5px; font-size: 15px; cursor: pointer; }\n</style>\n</head>\n<body>\n<div class=\"card\">\n  <h2>🚚 出貨查詢</h2>\n  <form action=\"/webhook-test/shipping-query\" method=\"POST\">\n    <label><b>訂單編號</b></label>\n    <input name=\"orderId\" required placeholder=\"ORD-001\">\n    <button type=\"submit\">查詢</button>\n  </form>\n</div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        176,
+        0
+      ],
+      "id": "d5cfdd91-5286-4fe4-9ab8-b1e69737618c",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "shipping-query",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        192
+      ],
+      "id": "e9cde120-4020-44c0-a3ff-7aa75ed70e82",
+      "name": "Webhook1",
+      "webhookId": "b53293b4-a1a8-4031-b160-c31f3c194c91"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileName": {
+          "__rl": true,
+          "value": "shippingList.xlsx",
+          "mode": "list",
+          "cachedResultName": "shippingList.xlsx"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "出貨清單",
+          "mode": "list",
+          "cachedResultName": "出貨清單"
+        }
+      },
+      "type": "n8n-nodes-excel-api.excelApi",
+      "typeVersion": 1,
+      "position": [
+        176,
+        192
+      ],
+      "id": "ebd87add-a9a1-42cf-983e-8727fa3013f4",
+      "name": "Excel API",
+      "credentials": {
+        "excelApiAuth": {
+          "id": "270EasCxuWQi9Swb",
+          "name": "Excel Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fda2c25c-955e-496b-9601-01bbd4429f63",
+              "leftValue": "={{ $json['訂單編號'] }}",
+              "rightValue": "={{ $('Webhook1').item.json.body.orderId }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "3c3b3a20-d364-4950-9421-dca23190bd91",
+              "leftValue": "={{ $json['出貨狀態'] }}",
+              "rightValue": "尚未出貨",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        192
+      ],
+      "id": "04b338c1-8ba6-436e-a6a6-77082aff232b",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "shipping-confirm",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        400
+      ],
+      "id": "3292274e-70d3-4687-9625-83356753956f",
+      "name": "Webhook2",
+      "webhookId": "9b23b4ab-b072-4f36-8b78-5b8854505418"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileName": {
+          "__rl": true,
+          "value": "shippingList.xlsx",
+          "mode": "list",
+          "cachedResultName": "shippingList.xlsx"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "出貨清單",
+          "mode": "list",
+          "cachedResultName": "出貨清單"
+        },
+        "lookupColumn": {
+          "__rl": true,
+          "value": "訂單編號",
+          "mode": "list",
+          "cachedResultName": "訂單編號"
+        },
+        "lookupValue": "={{ $json.body.orderId }}",
+        "valuesToSet": "{\n  \"出貨狀態\": \"已出貨\"\n}"
+      },
+      "type": "n8n-nodes-excel-api.excelApi",
+      "typeVersion": 1,
+      "position": [
+        176,
+        400
+      ],
+      "id": "a77ffe7f-8bee-46f7-b066-9447436160bc",
+      "name": "Excel API1"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileName": {
+          "__rl": true,
+          "value": "inventory.xlsx",
+          "mode": "list",
+          "cachedResultName": "inventory.xlsx"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "庫存",
+          "mode": "list",
+          "cachedResultName": "庫存"
+        }
+      },
+      "type": "n8n-nodes-excel-api.excelApi",
+      "typeVersion": 1,
+      "position": [
+        336,
+        400
+      ],
+      "id": "113f8aba-007a-45ac-a638-89638f7b2ddc",
+      "name": "Excel API2"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<!DOCTYPE html>\n<html lang=\"zh-TW\">\n<head><meta charset=\"UTF-8\"><title>出貨確認</title>\n<style>\n  body{font-family:Arial,sans-serif;max-width:520px;margin:60px auto;background:#f5f0ff;}\n  .card{background:white;padding:32px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.1);}\n  h2{color:#7D3C98;} table{width:100%;border-collapse:collapse;margin:16px 0;}\n  td,th{padding:9px 12px;border:1px solid #ddd;font-size:14px;}\n  th{background:#7D3C98;color:white;}\n  tr:nth-child(even){background:#f5f0ff;}\n  .btn{display:block;width:100%;margin-top:16px;padding:12px;background:#E74C3C;color:white;border:none;border-radius:5px;font-size:15px;font-weight:bold;cursor:pointer;text-align:center;}\n  .btn:hover{background:#C0392B;}\n</style>\n</head>\n<body>\n<div class=\"card\">\n  <h2>📦 出貨確認</h2>\n  <table>\n    <tr><th>欄位</th><th>內容</th></tr>\n    <tr><td>訂單編號</td><td>{{ $json['訂單編號'] }}</td></tr>\n    <tr><td>客戶名稱</td><td>{{ $json['客戶名稱'] }}</td></tr>\n    <tr><td>商品名稱</td><td>{{ $json['商品名稱'] }}</td></tr>\n    <tr><td>數量</td><td>{{ $json['數量'] }}</td></tr>\n    <tr><td>出貨狀態</td><td style=\"color:orange;font-weight:bold\">{{ $json['出貨狀態'] }}</td></tr>\n  </table>\n  <form action=\"/webhook-test/shipping-confirm\" method=\"POST\">\n    <input type=\"hidden\" name=\"orderId\" value=\"{{ $json['訂單編號'] }}\">\n    <input type=\"hidden\" name=\"productId\" value=\"{{ $json['商品編號'] }}\">\n    <input type=\"hidden\" name=\"quantity\" value=\"{{ $json['數量'] }}\">\n    <button class=\"btn\" type=\"submit\">✅ 確認出貨</button>\n  </form>\n</div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        512,
+        192
+      ],
+      "id": "fe0f9863-1eef-4a98-b862-f66a7eb0862c",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3acc0752-f7d5-4891-95d4-5b0506ea2318",
+              "leftValue": "={{ $json['商品編號'] }}",
+              "rightValue": "={{ $('Webhook2').first().json.body.productId }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        496,
+        400
+      ],
+      "id": "5680c86c-cc15-4400-94ce-db25315a22ca",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "30bdb5fa-3d21-4e91-b322-61f31ff86158",
+              "name": "庫存數量",
+              "value": "={{ Number($json['庫存數量']) - Number($('Webhook2').first().json.body.quantity) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        400
+      ],
+      "id": "64570265-7181-4935-a0ee-82b1f072604f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "fileName": {
+          "__rl": true,
+          "value": "inventory.xlsx",
+          "mode": "list",
+          "cachedResultName": "inventory.xlsx"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "庫存",
+          "mode": "list",
+          "cachedResultName": "庫存"
+        },
+        "lookupColumn": {
+          "__rl": true,
+          "value": "商品編號",
+          "mode": "list",
+          "cachedResultName": "商品編號"
+        },
+        "lookupValue": "={{ $('Filter1').item.json['商品編號'] }}",
+        "valuesToSet": "={ \n  \"庫存數量\": {{ $json['庫存數量'] }}\n}"
+      },
+      "type": "n8n-nodes-excel-api.excelApi",
+      "typeVersion": 1,
+      "position": [
+        800,
+        400
+      ],
+      "id": "ce421989-6e7d-4ca0-9098-f63f5457667e",
+      "name": "Excel API3"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<h2 style=\"font-family:Arial;color:green;text-align:center;margin-top:80px\">✅ 訂單 {{ $('Webhook2').first().json.body.orderId }} 已出貨，庫存已扣除！</h2>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        960,
+        400
+      ],
+      "id": "a295a034-53b0-4a47-81e0-87bd67e8540c",
+      "name": "Respond to Webhook2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Excel API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel API": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook2": {
+      "main": [
+        [
+          {
+            "node": "Excel API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel API1": {
+      "main": [
+        [
+          {
+            "node": "Excel API2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel API2": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Excel API3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel API3": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c8ff3d43-a064-4370-a533-2c965f6416a2",
+  "meta": {
+    "instanceId": "f5773e5d36e8a9a13d38de349e82c291ec43aee8ae98e4945d58baf34ebcdd7e"
+  },
+  "id": "EGD3tCY2pW6OFvb1",
+  "tags": []
+}

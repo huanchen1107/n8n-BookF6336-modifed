@@ -1,0 +1,154 @@
+{
+  "name": "ch4-5a",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        16,
+        0
+      ],
+      "id": "0c461250-c9bd-4f77-b316-0288a0753134",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\customer_service.xlsx",
+        "sheetNameOptions": "Sheet1"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4fb9e636-fd86-4401-9b99-747d424de7c3",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json['客戶問題'] }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "你是一位專業的客服人員，請用繁體中文回答客戶問題，回答要簡潔有禮貌。"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        352,
+        0
+      ],
+      "id": "5e63b114-7380-460c-9484-86e3ca00f839",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        208
+      ],
+      "id": "d4fd0de8-792c-4a39-9384-6c9e80bef642",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "oNIFwXwzzn5QyzNJ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch04\\customer_service.xlsx",
+        "operation": "updateRow",
+        "sheetNameOptions": "Sheet1",
+        "rowNumber": "={{ $('Read rows from Excel').item.json._rowNumber }}",
+        "updatedData": "={\"AI回答\": \"{{ $json.text.replace(/\\n/g, '\\\\n') }}\"}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        640,
+        0
+      ],
+      "id": "09e1224d-e2f4-4803-be31-72cd45e33ccf",
+      "name": "Update row in Excel"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Update row in Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "eb59cbec-d8a0-47db-8272-dec48894999e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "Ya0bdajoPgZ48v5r",
+  "tags": []
+}

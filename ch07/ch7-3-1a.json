@@ -1,0 +1,268 @@
+{
+  "name": "ch7-3-1a",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "C:\\n8n-data\\ch07\\input",
+        "events": [
+          "add"
+        ],
+        "options": {}
+      },
+      "id": "18924257-3919-461d-a1df-13ffc2647e25",
+      "name": "Local File Trigger",
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1660c789-11b9-48ff-a9b3-d0a0e5ae5083",
+              "name": "path",
+              "value": "={{ $json.path }}",
+              "type": "string"
+            },
+            {
+              "id": "fe2e7566-ae0b-4b00-ac06-e163d8423d56",
+              "name": "name",
+              "value": "={{ $json.path.split(/[\\\\/]/).last() }}",
+              "type": "string"
+            },
+            {
+              "id": "01377cc3-dda6-4ec9-9ebf-e34f26330fb6",
+              "name": "extension",
+              "value": "={{ $json.path.split('.').last().toLowerCase() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -336,
+        80
+      ],
+      "id": "31a4653f-5f98-470f-8b98-595aa8a8161f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Edit Fields').item.json.extension }}",
+                    "rightValue": "docx",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4263b450-ef4b-4a15-ac93-a8a38d8f19fe"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7f051747-24b0-4785-87d3-60557b9fb96b",
+                    "leftValue": "={{ $('Edit Fields').item.json.extension }}",
+                    "rightValue": "pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        80
+      ],
+      "id": "9eeb1622-c6a4-40ba-84fb-ddf0a8da3301",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "command": "=python C:\\\\n8n-data\\\\ch07\\\\read_docx.py \"{{ $('Edit Fields').item.json.path }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e2dd609c-78e3-4bb4-a109-98280faebd2d",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "41e7df8a-72b7-4003-a3c0-dc01d4f344f7",
+              "name": "full_text",
+              "value": "={{ JSON.parse($json.stdout).full_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        0
+      ],
+      "id": "9ce828b4-aa30-456b-aae1-4b0725e18423",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "command": "=python C:\\\\n8n-data\\\\ch07\\\\read_pdf.py \"{{ $('Edit Fields').item.json.path }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        144
+      ],
+      "id": "52706641-db48-420d-a8f8-6d51441984d5",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "41e7df8a-72b7-4003-a3c0-dc01d4f344f7",
+              "name": "full_text",
+              "value": "={{ JSON.parse($json.stdout).full_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        144
+      ],
+      "id": "10c75c24-5968-47ae-846a-217e2c0c82ff",
+      "name": "Edit Fields2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Local File Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f8f722f9-69ae-4742-8ddb-e0558be0b0bc",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "VtP4wqbMQYzmJL5n",
+  "tags": []
+}

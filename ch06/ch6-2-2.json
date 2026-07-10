@@ -1,0 +1,287 @@
+{
+  "name": "ch6-2-2",
+  "nodes": [
+    {
+      "parameters": {
+        "downloadAttachments": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        -704,
+        160
+      ],
+      "id": "bf11e92d-84c8-4ce3-b483-cc2468424160",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "kYIwep4jWGWaKlVt",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5d57df0d-d86d-4d44-9a55-39f333ec775b",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "問題",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "1ac3396a-e609-47a3-ab57-804f49b4a831",
+              "leftValue": "={{ $json.subject }}",
+              "rightValue": "客服",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -544,
+        160
+      ],
+      "id": "dc27f4b3-d5da-4448-9003-822a1bbb7cf0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "57c4b49c-bd5d-43ca-9731-93a4c8e669c1",
+              "name": "收件時間",
+              "value": "={{ new Date($json[\"date\"]).toLocaleString(\"zh-TW\", { year: \"numeric\", month: \"2-digit\", day: \"2-digit\", hour: \"2-digit\", minute: \"2-digit\", second: \"2-digit\", hour12: false }).replace(/\\//g, \"/\") }}",
+              "type": "string"
+            },
+            {
+              "id": "0c00e30a-e6df-4eaa-b25d-e19bfd39764b",
+              "name": "寄件者姓名",
+              "value": "={{ $json[\"from\"].replace(/<.*>/, \"\").trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "d147c137-7926-4af7-8a96-aa26c0e813c9",
+              "name": "寄件者Email",
+              "value": "={{ $json[\"from\"].match(/<(.+)>/)[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "6ce40b52-8233-450e-84c2-d250567f4130",
+              "name": "主旨",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "7e1a2b34-c79a-45af-9dd9-5bcc80f4c066",
+              "name": "=郵件內容摘要",
+              "value": "={{ $json[\"textPlain\"].slice(0, 200) }}",
+              "type": "string"
+            },
+            {
+              "id": "8bd6d5af-37a4-44c1-9af5-c20f73f6eb8c",
+              "name": "附檔名稱",
+              "value": "={{ $items().map(item => item.json.fileName).join(', ') }}",
+              "type": "string"
+            },
+            {
+              "id": "f40242ac-a241-4a2f-a5cc-add16523994c",
+              "name": "處理狀態",
+              "value": "待處理",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        192
+      ],
+      "id": "da52b495-d7ef-4928-941a-895000c8a4e3",
+      "name": "Edit Fields",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1ba0507b-0d69-4ad8-8e14-cd17fe7f0a31",
+              "leftValue": "={{ Object.keys($binary || {}).length > 0 }}",
+              "rightValue": "無附檔",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        16
+      ],
+      "id": "8cb62213-fff2-4118-892e-01d4245b2a39",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=C:/n8n-data/ch06/attachments/{{ $now.toFormat('yyyyMMdd_HHmmss') }}_{{ $json[\"fileName\"] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        0
+      ],
+      "id": "9a035fa5-0276-429d-92e3-4edb521e89eb",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch06\\客服郵件記錄.xlsx",
+        "operation": "appendRow",
+        "sheetNameOptions": "客服郵件記錄",
+        "rowData": "={{ $json }}"
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        192
+      ],
+      "id": "2017afaa-03a4-49ad-ab94-b9b659120775",
+      "name": "Add row to Excel"
+    },
+    {
+      "parameters": {
+        "jsCode": "function decodeMimeWord(str) {\n  if (!str) return str;\n  return str.replace(/=\\?UTF-8\\?B\\?([^?]+)\\?=/gi, (match, b64) => {\n    return Buffer.from(b64, 'base64').toString('utf8');\n  }).replace(/=\\?UTF-8\\?Q\\?([^?]+)\\?=/gi, (match, qp) => {\n    return qp.replace(/_/g, ' ').replace(/=([0-9A-F]{2})/gi, \n      (m, hex) => String.fromCharCode(parseInt(hex, 16)));\n  });\n}\n\nconst binaryKeys = Object.keys($input.item.binary || {});\n\n// 無附檔：直接回傳原始 item，附檔名稱設為「無附檔」\nif (binaryKeys.length === 0) {\n  return [{\n    json: {\n      ...($input.item.json),\n      fileName: '無附檔',\n    }\n  }];\n}\n\n// 有附檔：拆成多個 items\nconst items = [];\nfor (const key of binaryKeys) {\n  const rawFileName = $input.item.binary[key].fileName;\n  const decodedFileName = decodeMimeWord(rawFileName);\n  \n  items.push({\n    json: {\n      ...($input.item.json),\n      binaryKey: key,\n      fileName: decodedFileName,\n    },\n    binary: {\n      data: $input.item.binary[key]\n    }\n  });\n}\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        96
+      ],
+      "id": "3575cdee-2b5b-487e-b877-3995a713969b",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Add row to Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "9b60b4b0-8296-43a4-912b-119304ff8dfd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "Ace2ZCSP5gq9l4Wy",
+  "tags": []
+}

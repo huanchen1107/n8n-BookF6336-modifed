@@ -1,0 +1,252 @@
+{
+  "name": "ch9-5-2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ea23a269-178e-4e29-bd9c-c65a97ea60f0",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "filePath": "C:\\n8n-data\\ch09\\restockList.xlsx",
+        "sheetNameOptions": "補貨清單",
+        "includeRowNumber": false
+      },
+      "type": "n8n-nodes-excel-ai.excelAI",
+      "typeVersion": 1,
+      "position": [
+        192,
+        0
+      ],
+      "id": "2f26df44-3214-4632-b3b0-416bdb52fa93",
+      "name": "Read rows from Excel"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a5e57393-bc1e-4870-8446-2c275d1ecd87",
+              "name": "商品編號",
+              "value": "={{ $json.商品編號 }}",
+              "type": "string"
+            },
+            {
+              "id": "74a14d2f-64c7-495d-a5d6-2e6d7e4bfcf0",
+              "name": "商品名稱",
+              "value": "={{ $json.商品名稱 }}",
+              "type": "string"
+            },
+            {
+              "id": "4a3d0b6b-7613-4e37-879d-f82f329a0b13",
+              "name": "目前庫存",
+              "value": "={{ $json.目前庫存 }}",
+              "type": "number"
+            },
+            {
+              "id": "37e48e40-2184-4cb3-a892-5e89c42422cc",
+              "name": "安全庫存",
+              "value": "={{ $json.安全庫存 }}",
+              "type": "number"
+            },
+            {
+              "id": "540b1ac3-fa28-47c7-83b5-9bcbd5b11c8c",
+              "name": "缺口數量",
+              "value": "={{ Number($json['安全庫存']) - Number($json['目前庫存']) }}",
+              "type": "number"
+            },
+            {
+              "id": "7707cf8a-e3a7-4fde-bde8-8a0420ada664",
+              "name": "建議補貨量",
+              "value": "={{ $json.建議補貨量 }}",
+              "type": "number"
+            },
+            {
+              "id": "7b566ed6-3d88-4457-afe9-415c4ec122b0",
+              "name": "單價",
+              "value": "={{ $json.單價 }}",
+              "type": "number"
+            },
+            {
+              "id": "3b0aea89-f985-41cf-9d58-280616689d0f",
+              "name": "補貨時間",
+              "value": "={{ $json.補貨時間 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        0
+      ],
+      "id": "454969ec-d607-4c7b-b819-d4f0410880d1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "sum",
+              "field": "建議補貨量"
+            },
+            {
+              "field": "商品編號"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "072dcedb-556f-45c8-9406-b25725b16064",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "templatePath": "C:\\n8n-data\\ch09\\restock_template.xlsx",
+        "outputPath": "=C:\\n8n-data\\ch09\\補貨報表_{{ $now.format('yyyyMMdd') }}.xlsx",
+        "dataEntries": {
+          "entries": [
+            {
+              "cell": "B2",
+              "value": "={{ $now.format('yyyy/MM/dd') }}"
+            },
+            {
+              "cell": "D2",
+              "value": "陳會安"
+            },
+            {
+              "cell": "F2",
+              "value": "={{ $json['count_商品編號'] }}"
+            },
+            {
+              "cell": "H2",
+              "value": "={{ $json['count_商品數量'] > 3 ? '緊急' : '正常' }}"
+            },
+            {
+              "entryType": "tableData",
+              "startCell": "A5",
+              "tableData": "={{ $('Edit Fields').all().map(item => item.json) }}",
+              "writeHeaders": false
+            },
+            {
+              "cell": "F15",
+              "value": "={{ $json['sum_建議補貨量'] }}"
+            },
+            {
+              "cell": "A17",
+              "value": "本報表由系統自動產生，請採購人員確認後進行補貨作業。"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-excel-templater.excelTemplater",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "a5291209-adb1-4cef-8eff-71b92c0cc43a",
+      "name": "Excel Templater"
+    },
+    {
+      "parameters": {
+        "command": "=python \"C:\\n8n-data\\ch09\\excel_to_pdf.py\" \"{{ $json.outputPath }}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        784,
+        0
+      ],
+      "id": "311bfc39-f063-45c9-806b-c9ac6fed5dfb",
+      "name": "Execute Command"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read rows from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read rows from Excel": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Excel Templater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Excel Templater": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "03b20922-3a31-4f37-9736-902341eeb0f9",
+  "meta": {
+    "instanceId": "b7e8bde9e1f3bc95e834c365dcac5221dc114e48bacba4a88ee234549244d416"
+  },
+  "id": "u7KUwT5gVMJ4j60w",
+  "tags": []
+}
