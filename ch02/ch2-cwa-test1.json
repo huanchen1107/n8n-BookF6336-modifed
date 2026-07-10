@@ -1,0 +1,92 @@
+{
+  "name": "ch2-cwa-test1",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-node-id",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "CWA-55FDA6D3-A43C-4AE0-BB30-E62D5F684FB2"
+            },
+            {
+              "name": "elementName",
+              "value": "MaxT,MinT,T"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-request-node-id",
+      "name": "Get 7-Day Forecast (F-D0047-091)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "CWA-55FDA6D3-A43C-4AE0-BB30-E62D5F684FB2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-request-observation-node",
+      "name": "Get Current Observation (O-A0001-001)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        220,
+        180
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Get 7-Day Forecast (F-D0047-091)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Current Observation (O-A0001-001)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b1b01c10-0a8a-40a2-aaaf-5527f0ef7e89",
+  "id": "ch2-cwa-test1-id",
+  "tags": []
+}
