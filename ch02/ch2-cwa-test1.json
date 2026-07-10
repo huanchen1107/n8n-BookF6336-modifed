@@ -57,7 +57,7 @@
     {
       "parameters": {
         "operation": "write",
-        "fileName": "/Users/huango/n8n-data/ch02/ch2-cwa-test1.xlsx",
+        "fileName": "/Users/huango/Desktop/n8n-Excel-F6336/n8n-BookF6336-modified-master/ch02/ch2-cwa-test1.xlsx",
         "options": {}
       },
       "id": "write-node",
