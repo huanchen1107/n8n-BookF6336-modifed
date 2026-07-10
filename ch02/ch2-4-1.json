@@ -37,7 +37,7 @@
     {
       "parameters": {
         "operation": "write",
-        "fileName": "C:/n8n-data/ch02/rss_news.xlsx",
+        "fileName": "/Users/huango/n8n-data/ch02/rss_news.xlsx",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
